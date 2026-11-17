@@ -1,0 +1,598 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Pixel Fly (Copy)</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e1220;--fg:#fff;--pan:#1d2433;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1220;--fg:#fff}}
+:root[data-theme="dark"]{--bg:#0e1220;--fg:#fff}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:'Press Start 2P',monospace,sans-serif;display:flex;justify-content:center;align-items:center;overflow:hidden;user-select:none;touch-action:manipulation}
+#w{position:relative;overflow:hidden;background:#000}
+#c{width:100%;height:100%;display:block;image-rendering:pixelated}
+.s{position:absolute;inset:0;display:none;flex-direction:column;padding:3em .7em .7em;gap:.5em}
+.s.on{display:flex}
+.top{position:absolute;top:.6em;left:.6em;right:.6em;display:flex;justify-content:space-between;font-size:.7em;z-index:5}
+.top span{background:#000a;padding:.5em;border:.15em solid #fff4}
+.b{font:inherit;font-size:.7em;background:#ffd23f;color:#000;border:.25em solid #000;box-shadow:0 .25em 0 #000;padding:.7em .6em;cursor:pointer;margin:.1em}
+.b:active{transform:translateY(.2em);box-shadow:none}
+.b.g{background:#5c2}.b.r{background:#f55}
+h1{font-size:2.6em;margin:.2em;color:#ffd23f;text-shadow:.1em .1em 0 #000}h2{font-size:1.2em;margin:.2em 0;text-shadow:.1em .1em 0 #000;text-align:center}
+.p{background:#0a0e1cdd;border:.2em solid #000;padding:.5em;font-size:.7em;line-height:1.6}
+small{font-size:.6em}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.4em;overflow:auto;flex:1;min-height:0;align-content:start}
+.list{display:flex;flex-direction:column;gap:.4em;overflow:auto;flex:1;min-height:0}
+.card{background:var(--pan);border:.2em solid;padding:.3em;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:.2em;font-size:.8em}
+.card canvas{width:100%;image-rendering:pixelated}
+.mini{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:.3em}.mini canvas{width:100%;image-rendering:pixelated}
+.tabs{display:flex;flex-wrap:wrap}.tabs .b{font-size:.5em;padding:.6em .4em}
+.mid{margin:auto 0 3em;display:flex;align-items:center;justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:.5em}.col .b{font-size:.55em;width:7em}
+#play{font-size:1.1em;padding:1em 1em}
+.m{position:absolute;inset:0;background:#000b;display:none;flex-direction:column;align-items:center;justify-content:center;gap:.8em;z-index:10;text-align:center;font-size:.8em;padding:1em}.m.on{display:flex}
+#ts{position:absolute;bottom:2em;left:50%;transform:translateX(-50%);background:#000;padding:.6em;font-size:.6em;z-index:30;display:none;border:.2em solid #ffd23f;text-align:center;max-width:90%}
+#hud{pointer-events:none;padding-top:.6em}#hud .b{pointer-events:auto}
+#sc{font-size:2.4em;text-align:center;text-shadow:.1em .1em 0 #000}
+input[type=text]{font:inherit;font-size:.8em;padding:.6em;width:100%;box-sizing:border-box}
+input[type=range]{width:100%}
+textarea{font:inherit;font-size:.6em;width:100%;box-sizing:border-box;height:5em}
+#rc{width:10em;image-rendering:pixelated}
+@keyframes gl{50%{box-shadow:0 0 2em var(--rc)}}#rvb{animation:gl 1s infinite}
+</style></head><body>
+<div id="w"><canvas id="c"></canvas><div id="cur" class="top"></div>
+
+<div class="s on" id="intro" style="justify-content:center;align-items:center;text-align:center"><h1>PIXEL<br>FLY</h1><p style="font-size:.8em">by -BuddyBoy-</p><button class="b" style="font-size:1.1em" onclick="go('menu')">PLAY</button></div>
+
+<div class="s" id="menu"><h2>PIXEL FLY</h2><button class="b" id="bmside" onclick="go('bm')" style="display:none;position:absolute;left:.6em;top:3.4em;background:#111;color:#f55;border-color:#f55">BLACK<br>MARKET</button><div class="mid">
+<div class="col"><button class="b" onclick="go('shop')">SHOP</button><button class="b" onclick="go('locker')">LOCKER</button><button class="b" onclick="go('gems')">PEMS</button><button class="b" onclick="go('daily')">DAILY</button><button class="b" onclick="go('mp')">MULTI</button></div>
+<button class="b g" id="play" onclick="go('modes')">PLAY</button>
+<div class="col"><button class="b" onclick="go('codes')">CODES</button><button class="b" onclick="go('stats')">STATS</button><button class="b" onclick="go('settings')">SETTINGS</button><button class="b" onclick="go('trade')">TRADE</button><button class="b" onclick="go('bet')">BET</button></div></div></div>
+
+<div class="s" id="modes"><h2>CHOOSE MODE</h2><div class="list" id="ml"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="start"><h2 id="sh"></h2><div class="list" id="pl"></div><button class="b g" onclick="begin()">START</button><button class="b" onclick="go('menu')">BACK TO MENU</button></div>
+<div class="s" id="shop"><h2>SHOP</h2><div class="p" id="dl"></div><div class="tabs" id="st"></div><div id="sl" class="grid"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="locker"><canvas id="pv" width="60" height="44" style="width:12em;align-self:center;image-rendering:pixelated;border:.2em solid #000"></canvas><div class="tabs" id="lt"></div><div id="ll" class="grid"></div><div class="p" id="lb"></div><div class="p" id="ntg" style="display:none"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="bet"><h2>BETTING</h2><div id="bb" class="list"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="bm"><h2 style="color:#f55">BLACK MARKET</h2><div id="bmb" class="list"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="mp"><h2>MULTIPLAYER</h2><div id="mpb" class="list"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="trade"><h2>TRADE</h2><div class="tabs" id="tt"></div><div id="tb" class="list"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="gems"><h2>PEMS SHOP</h2><div class="list" id="gl"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="daily"><h2>DAILY REWARD</h2><div class="p" id="dy"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="codes"><h2>CODES</h2><input type="text" id="ci" placeholder="Enter code"><button class="b g" onclick="redeem()">REDEEM</button><div class="p" id="cmsg">Type a code above.</div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="stats"><h2>STATS</h2><div class="p list" id="sx"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="settings"><h2>SETTINGS</h2><div class="p list" id="sg"></div><button class="b" onclick="go('menu')">BACK</button></div>
+<div class="s" id="hud"><div id="sc">0</div><div class="p" id="hp" style="align-self:center"></div><button class="b" style="align-self:flex-end;margin-top:auto" onclick="pause()">PAUSE</button></div>
+<div class="s" id="pause" style="justify-content:center;align-items:center"><h2>PAUSED</h2><button class="b g" onclick="paused=false;show('hud')">RESUME</button><button class="b" onclick="begin()">RESTART</button><button class="b" onclick="go('menu')">MENU</button></div>
+<div class="s" id="over" style="justify-content:center;align-items:center;text-align:center"><div class="p" id="ov"></div><button class="b g" onclick="begin()">RESTART</button><button class="b" onclick="share()">SHARE</button><button class="b" onclick="go('menu')">MENU</button></div>
+
+<div class="m" id="cf"><div id="cm"></div><div><button class="b g" id="yes">YES</button><button class="b" id="alt" style="display:none;background:#6ff">PEMS</button><button class="b r" id="no">NO</button></div></div>
+<div class="m" id="rv" style="z-index:11"><div id="rvb" class="p"></div><button class="b g" id="rok" onclick="$('#rv').classList.remove('on')">OK</button></div>
+<div id="ts"></div></div>
+
+<script>
+const $=s=>document.querySelector(s),W=180,H=300,G=268,PW=26,SP=88;
+const cv=$('#c'),X=cv.getContext('2d');cv.width=W;cv.height=H;
+const RN=['Common','Uncommon','Rare','Super Rare','Epic','Mythic','Legendary','Ultra Pixel','Ancient'],
+RC=['#b8b8b8','#4ade80','#3b9cff','#b66cff','#ff4fd8','#ff6a3d','#ffc928','#00ffe1','#ff2d55'],
+RV=[10,25,60,150,400,1000,3000,8000,20000];
+/* ---------- items ---------- */
+const I=[],M={};
+const A=(cat,l)=>l.forEach(([rar,name,d,x])=>{const it={id:cat+I.length,cat,rar,name,d,x};I.push(it);M[it.id]=it});
+const wg=(c,s)=>[[-9,-4,6+s,3,c],[-9-s,-7,3+s,3,c]],CR=c=>[[-4,-8,9,3,c],[-4,-10,2,2,c],[0,-11,2,3,c],[3,-10,2,2,c]];
+A('skin',[[0,'Classic','#fc3'],[0,'Ruby','#e44'],[1,'Sky','#4af'],[1,'Mint','#5d9'],[2,'Violet','#a6f'],[2,'Candy','#f8c'],[3,'Ghost','#dde'],[4,'Gold','#fb0'],[5,'Shadow','#445'],[6,'Rainbow','*'],[7,'Glitch','gl']]);
+A('trail',[[0,'Smoke',['#999','#bbb']],[1,'Fire',['#f80','#fc0','#e33']],[2,'Water',['#4af','#8cf']],[3,'Sparkle',['#fff','#ff8','#aef']],[4,'Hearts',['#f5a','#f37']],[5,'Toxic',['#7f3','#3c0','#af0']],[6,'Gold Dust',['#fd0','#fa0','#fff']],[7,'Pixel Rain','*']]);
+A('hat',[[0,'Cap',[[-4,-8,9,3,'#e33'],[3,-6,6,2,'#c22']]],[1,'Beanie',[[-5,-8,10,4,'#39f'],[-1,-10,3,2,'#fff']]],[2,'Party',[[0,-14,2,2,'#fd0'],[-2,-12,5,2,'#f5a'],[-3,-10,7,2,'#4af'],[-4,-8,9,3,'#f5a']]],[3,'Top Hat',[[-5,-8,11,2,'#222'],[-3,-14,7,6,'#222'],[-3,-10,7,1,'#e33']]],[4,'Cowboy',[[-8,-8,16,2,'#a63'],[-4,-11,8,3,'#a63']]],[5,'Crown',CR('#fc0')],[6,'Halo',[[-4,-13,9,2,'#ffe066'],[-5,-12,1,1,'#ffe066'],[5,-12,1,1,'#ffe066']]],[7,'Pixel Crown',CR('*')]]);
+A('glasses',[[0,'Shades',[[0,-4,8,3,'#111'],[-3,-4,3,1,'#111']]],[1,'Round',[[1,-5,5,4,'#8cf'],[-3,-4,4,1,'#333']]],[2,'Hearts',[[1,-5,5,4,'#f46']]],[3,'Neon',[[0,-4,8,3,'#0f8']]],[4,'Visor',[[-2,-5,10,3,'#f0f']]],[5,'Gold',[[0,-4,8,3,'#fc0'],[-3,-4,3,1,'#fc0']]],[6,'Laser',[[0,-4,8,2,'#f00'],[8,-4,8,1,'#f66']]],[7,'Pixel Vision',[[0,-5,8,4,'*']]]]);
+A('wings',[[0,'Feather',wg('#ddd',0)],[1,'Leaf',wg('#4c4',1)],[2,'Bat',wg('#524',2)],[3,'Angel',wg('#fff',3)],[4,'Flame',wg('#f70',3)],[5,'Dragon',wg('#c22',4)],[6,'Galaxy',wg('#84f',4)],[7,'Pixel Wings',wg('*',5)]]);
+A('bg',[[0,'Classic',['#4ec0ca','#8fe0e8','cloud']],[1,'Day',['#4aa8ff','#c4ecff','cloud']],[2,'Sunset',['#ff7e5f','#feb47b','cloud']],[2,'Night',['#0b1030','#2a2a6a','star']],[3,'Underwater',['#0a4a7a','#1a9fb8','bub']],[4,'Winter',['#8aa8c8','#e8f0f8','snow']],[5,'Space',['#050010','#1a0a3a','star']],[6,'Neon City',['#1a0033','#ff2aa8','star']],[7,'Pixel Void',['#000','#0a2a1a','rain']]]);
+A('pipe',[[0,'Classic',['#5c2','#9e5','#371']],[1,'Brick',['#c63','#e95','#832']],[2,'Ice',['#8de','#cff','#4ab']],[3,'Steel',['#99a','#ccd','#556']],[4,'Candy',['#f6a','#fbd','#c37']],[5,'Lava',['#f50','#fa0','#900']],[6,'Gold',['#fc0','#ff8','#a80']],[7,'Rainbow','*']]);
+const first=c=>I.find(i=>i.cat==c).id,CATS=['skin','trail','hat','glasses','wings','bg','pipe'];
+A('skin',[[0,'Lime','#9e3'],[1,'Peach','#fa8'],[2,'Ocean','#28d'],[3,'Lava','#f50'],[3,'Ice','#9ef'],[4,'Galaxy','#63c'],[5,'Zombie','#7a5'],[6,'Diamond','#8ff']]);
+A('trail',[[0,'Dust',['#ccb','#aa9']],[1,'Leaves',['#4a3','#7c4']],[2,'Bubbles',['#8df','#fff']],[3,'Neon',['#0ff','#f0f']],[4,'Lightning',['#ff5','#fff','#8cf']],[5,'Blood Moon',['#a00','#f33','#400']],[6,'Aurora',['#0fa','#a0f','#0af']]]);
+A('hat',[[0,'Headband',[[-5,-6,11,2,'#e33']]],[1,'Bow',[[-3,-8,3,3,'#f6a'],[1,-8,3,3,'#f6a'],[0,-7,1,1,'#fff']]],[2,'Pirate',[[-5,-8,11,3,'#222'],[-1,-7,3,1,'#fff']]],[3,'Wizard',[[-6,-8,12,2,'#52a'],[-3,-11,7,3,'#52a'],[-1,-14,3,3,'#52a'],[0,-12,1,1,'#fd0']]],[4,'Viking',[[-4,-8,9,3,'#999'],[-6,-11,2,3,'#fff'],[4,-11,2,3,'#fff']]],[5,'Devil Horns',[[-4,-10,2,4,'#e11'],[3,-10,2,4,'#e11']]],[6,'Flame Crown',[[-4,-8,9,2,'#f80'],[-3,-11,2,3,'#fc0'],[0,-13,2,5,'#f50'],[3,-11,2,3,'#fc0']]]]);
+A('glasses',[[0,'Pixel Specs',[[0,-4,8,3,'#fff'],[1,-3,2,1,'#000'],[5,-3,2,1,'#000']]],[1,'Orange',[[0,-4,8,3,'#fa3']]],[2,'Star',[[1,-5,5,5,'#ff3']]],[3,'Ice Blue',[[0,-4,8,3,'#6ef']]],[4,'Cyber',[[-3,-4,12,2,'#0ff'],[0,-2,8,1,'#f0f']]],[5,'Ruby',[[0,-4,8,3,'#d02']]],[6,'Diamond',[[0,-4,8,3,'#cff'],[-3,-4,3,1,'#cff']]]]);
+A('wings',[[0,'Paper',wg('#ffe',0)],[1,'Butterfly',wg('#f8c',1)],[2,'Ghost',wg('#bcd',2)],[3,'Ice',wg('#8ef',3)],[4,'Thunder',wg('#fe3',3)],[5,'Shadow',wg('#306',4)],[6,'Phoenix',wg('#f5c',5)]]);
+A('bg',[[0,'Meadow',['#7ccf5a','#cfeea0','cloud']],[1,'Dusk',['#6a4fa3','#f2a1b5','cloud']],[2,'Deep Sea',['#031a33','#0b5a80','bub']],[3,'Blizzard',['#5a6b88','#bcc8d8','snow']],[4,'Candy Land',['#ffb3e6','#b3f0ff','snow']],[5,'Nebula',['#1a0030','#5a1a7a','star']],[6,'Matrix',['#000','#041','rain']]]);
+A('pipe',[[0,'Moss',['#7a5','#ad7','#463']],[1,'Pumpkin',['#f90','#fc6','#a50']],[2,'Ocean',['#39c','#7cf','#168']],[3,'Obsidian',['#336','#669','#113']],[4,'Neon Pink',['#f0a','#f8d','#a07']],[5,'Magma',['#c30','#f70','#600']],[6,'Diamond',['#6ee','#cff','#299']]]);
+A('skin',[[7,'Void','#111']]);A('trail',[[7,'Glitch Stream',['#0ff','#f0f','#fff','#ff0']]]);A('hat',[[7,'Pixel Halo',[[-5,-12,11,2,'*'],[-6,-11,1,2,'*'],[5,-11,1,2,'*']]]]);A('glasses',[[7,'Matrix Visor',[[-2,-5,10,4,'#0f6'],[0,-3,8,1,'#000']]]]);A('wings',[[7,'Glitch Wings',wg('gl',5)]]);A('bg',[[7,'Arcade',['#14003a','#00d0ff','rain']]]);A('pipe',[[7,'Hologram',['#0ff','#f0f','#fff']]]);
+const XS={dragon:(c,t,dy)=>{R(c,-3,-8,2,4,'#fc0');R(c,2,-8,2,4,'#fc0');for(let i=0;i<3;i++)R(c,-6+i*4,-7,2,2,'#c22');R(c,-13,0,5,3,'#2fa84f');R(c,-15,-1,3,3,'#c22');R(c,-8,-9+dy,9,4,'#7a1');R(c,-12,-12+dy,5,4,'#7a1');R(c,7,1,3,2,'#2fa84f');if(t%8<5){R(c,11,-1,5,3,'#f80');R(c,11,0,3,1,'#ff0');R(c,16,-1+(t%3),2,2,'#f50')}},robot:(c,t)=>{R(c,0,-9,1,4,'#ccc');R(c,-1,-11,3,3,t%20<10?'#f33':'#a00');R(c,4,-4,2,2,'#f00');R(c,-5,0,2,2,'#555');R(c,2,1,2,2,'#555');R(c,-7,-1,14,1,'#0003')},inferno:(c,t)=>{R(c,-5,-8-(t%6<3),2,3,'#f50');R(c,-1,-10-(t%4<2),3,5,'#fa0');R(c,3,-8-(t%5<2),2,3,'#f50');R(c,-12,-(t%3),4,3,'#f80');R(c,-15,-1-(t%4<2),3,3,'#fc0')},ninja:(c,t)=>{R(c,-7,-4,14,2,'#e11');R(c,-12,-4+(t%10<5?0:1),5,2,'#e11');R(c,1,0,6,4,'#111');R(c,3,-4,2,2,'#fff')}};
+A('skin',[[7,'Dragon','#2fa84f','dragon'],[7,'Robot','#9aa','robot'],[7,'Inferno','#e43','inferno'],[7,'Shadow Ninja','#222','ninja']]);
+A('trail',[[7,'Dragon Fire',['#f50','#fa0','#ff0','#a00']],[7,'Soul Flames',['#0ff','#08f','#fff']],[7,'Void Rift',['#000','#80f','#f0f']],[7,'Meteor',['#fff','#fa0','#f50']]]);
+A('hat',[[7,'Dragon Horns',[[-5,-10,2,5,'#fc0'],[-6,-13,2,3,'#fc0'],[4,-10,2,5,'#fc0'],[5,-13,2,3,'#fc0']]],[7,'Samurai Helm',[[-5,-8,11,3,'#a11'],[-7,-7,3,3,'#a11'],[5,-7,3,3,'#a11'],[-1,-13,3,5,'#fc0']]],[7,'Flaming Skull',[[-3,-9,7,5,'#eee'],[-2,-7,2,2,'#000'],[1,-7,2,2,'#000'],[-2,-12,2,3,'#f50'],[2,-13,2,4,'#fa0']]],[7,'Void Crown',[[-4,-8,9,3,'#80f'],[-5,-12,2,4,'#80f'],[-1,-14,3,6,'#f0f'],[4,-12,2,4,'#80f']]]]);
+A('glasses',[[7,'Laser Eyes',[[0,-4,3,3,'#f00'],[3,-3,24,1,'#f55']]],[7,'Flame Eyes',[[0,-5,3,4,'#f80'],[1,-7,2,2,'#fc0']]],[7,'Ninja Mask',[[-7,-5,14,3,'#111'],[0,-4,5,1,'#fff']]],[7,'Hacker Visor',[[-2,-5,10,4,'#0f6'],[0,-3,8,1,'#000']]]]);
+A('wings',[[7,'Dragon Wings',wg('#a00',7)],[7,'Inferno Wings',wg('#f50',6)],[7,'Void Wings',wg('#40a',7)],[7,'Golden Wings',wg('#ffe27a',7)]]);
+A('bg',[[7,'Volcano',['#2a0505','#ff5a1a','ember',['#c21','#fa0','#ff6']]],[7,'Toxic Swamp',['#0a2a10','#4a8a1a','bub',['#2a6a10','#7f2','#af4']]],[7,'Frozen Throne',['#0a1a3a','#8cf','snow',['#9cf','#fff','#cff']]],[7,'Thunder Storm',['#1a1f33','#4a5a7a','storm',['#223','#456','#789']]]]);
+A('pipe',[[7,'Spike Trap',['#555','#999','#222','s']],[7,'Lava Spikes',['#c30','#f70','#600','s']],[7,'Bone Spikes',['#ddd','#fff','#aaa','s']],[7,'Crystal Spikes',['#3cf','#aef','#27a','s']],[7,'Toxic Spikes',['#3c3','#8f8','#161','s']]]);
+const AP=(cat,l)=>{const n=I.length;A(cat,l);I.slice(n).forEach(i=>i.pe=1)};
+AP('skin',[[3,'Pumpkin','#f80'],[4,'Frostbite','#9df'],[5,'Magma','#c31'],[6,'Toxic Slime','#7f2']]);
+AP('trail',[[3,'Confetti',['#f5a','#5af','#fd0','#5d5']],[4,'Ember',['#f60','#fa0']],[5,'Frost',['#bef','#fff','#8cf']],[6,'Shadow Smoke',['#222','#555','#80f']]]);
+AP('hat',[[3,'Chef',[[-4,-12,9,4,'#fff'],[-3,-8,7,2,'#fff']]],[4,'Pumpkin Head',[[-4,-9,9,4,'#f80'],[-1,-11,2,2,'#3a3']]],[5,'Knight Helm',[[-5,-9,11,5,'#99a'],[-1,-7,5,1,'#222'],[0,-12,2,3,'#e33']]],[6,'Royal Crown',[[-5,-8,11,3,'#fc0'],[-5,-11,2,3,'#fc0'],[-1,-12,3,4,'#f33'],[4,-11,2,3,'#fc0']]]]);
+AP('glasses',[[3,'Heart Shades',[[0,-4,8,3,'#f6a']]],[4,'3D Glasses',[[0,-4,4,3,'#f33'],[4,-4,4,3,'#3cf']]],[5,'Lava Lens',[[0,-4,8,3,'#f50'],[2,-4,2,1,'#fd0']]],[6,'Galaxy Lens',[[0,-4,8,3,'#63f'],[2,-4,1,1,'#fff'],[5,-3,1,1,'#fff']]]]);
+AP('wings',[[3,'Candy',wg('#f9c',3)],[4,'Bee',wg('#fd3',3)],[5,'Crystal',wg('#7ef',5)],[6,'Storm',wg('#58f',6)]]);
+AP('bg',[[3,'Cherry Blossom',['#ffc9de','#fff0f5','snow']],[4,'Desert',['#f2a65a','#ffe0a3','cloud']],[5,'Aurora',['#041a2e','#2e8a6a','star']],[6,'Cyber Sunset',['#2a0a4a','#ff4fa0','star',['#201040','#ff4fa0','#ffd']]]]);
+AP('pipe',[[3,'Cactus',['#3a7','#6c9','#164']],[4,'Bamboo',['#8b5','#cd8','#573']],[5,'Neon Blue',['#08f','#8df','#04a']],[6,'Black Gold',['#222','#fc0','#000']]]);
+const KEEP=['Dragon','Inferno','Dragon Fire','Dragon Horns','Flaming Skull','Flame Eyes','Dragon Wings','Inferno Wings','Volcano','Lava Spikes'];
+I.forEach(i=>{if(i.rar==7&&!KEEP.includes(i.name)){i.rar=5;i.pe=1}});
+const PT=[[/rainbow|prism/i,['*','#fff','#306','#f6f']],[/\bice\b|icicle|frost|snow|glacier|arctic|polar|blizzard|yeti|frozen/i,['#7cf','#cff','#37a','#fff']],[/blood|crimson|hell|vampire|ruby|\bred\b/i,['#c11','#f55','#600','#f00']],[/lava|magma|fire|flame|ember|inferno|burning|volcan|molten|cinder|solar|\bsun\b|phoenix|salamander|\bash/i,['#f50','#fa0','#900','#ff0']],[/void|shadow|dark|nightmare|abyss|obsidian|eclipse|cursed|dream|amethyst|violet|purple|black/i,['#527','#a6f','#203','#d0f']],[/poison|venom|toxic|plague|swamp|bog|emerald|green|forest|moss|leaf|jungle|thorn|\bent\b|vine|pollen/i,['#3a3','#8f6','#164','#af0']],[/gold|sphinx|sand|desert|dune|scarab|pharaoh/i,['#eb3','#fe9','#a70','#fff']],[/sapphire|ocean|\bsea\b|kraken|coral|aqua|water|mermaid|reef|bubble|serpent|blue|pond|lake/i,['#27c','#6cf','#148','#8ef']],[/thunder|storm|lightning|electric|shock|wind|hurricane/i,['#58c','#ff6','#235','#ff0']],[/gem|crystal|diamond|shard|moonstone/i,['#3dc','#aff','#176','#fff']],[/star|cosmic|galaxy|space|nebula|meteor|celestial|moon|lunar|astral|time|clock|glow/i,['#46c','#aaf','#125','#fff']],[/unicorn|fairy|glitter|sparkle|blossom|garden|enchanted/i,['#f7c','#fcf','#a37','#fff']],[/holy|halo|seraph|heaven|divine|light|godbird|pure|spirit|ghost|spectral|wisp|phantom/i,['#eef','#fff','#99b','#ffd']],[/stone|golem|rock|rune|boulder|ancient|ruin|iron|silver|wolf|bone|fang|talon|claw|horn|cloud|feather/i,['#889','#ccd','#445','#eef']]];
+const pal=s=>{for(const[r,p]of PT)if(r.test(s))return p;const h=[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))%360,7);return[`hsl(${h},65%,50%)`,`hsl(${h},80%,75%)`,`hsl(${h},60%,25%)`,`hsl(${(h+40)%360},90%,65%)`]};
+function ex(c,t,dy,f,P){const[m,l,d,a]=P,r=(x,y,w,h,k)=>R(c,x,y,w,h,k,t);
+ if(f.w){r(-9,-10+dy,10,4,l);r(-13,-13+dy,6,4,m)}
+ if(f.h){r(-3,-8,2,4,a);r(2,-8,2,4,a)}
+ if(f.e){r(-5,-8,3,3,m);r(2,-8,3,3,m);r(-4,-7,1,1,a)}
+ if(f.t){r(-13,0,5,3,m);r(-15,-1,3,3,a)}
+ if(f.f){r(-5,-8-(t%6<3),2,3,a);r(-1,-10-(t%4<2),3,5,l);r(3,-8-(t%5<2),2,3,a)}
+ if(f.o)r(-4,-12,9,1,a);
+ if(f.a){r(-4,-12,1,5,d);r(-5,-12,3,1,d);r(3,-12,1,5,d);r(3,-12,3,1,d)}
+ if(f.k)for(let i=0;i<3;i++)r(-5+i*4,5+((t>>3)+i)%2,2,3,m)}
+const FX=[[/\bice\b|frost|snow|blizzard|polar|arctic|glacier|frozen/i,'snow'],[/fire|lava|volcan|burning|magma|\bash|ember|flame|solar|forge|firestorm|charcoal|inferno|\bsun\b/i,'ember'],[/ocean|\bsea\b|reef|coral|swamp|bog|pond|abyss|lake|poison|kraken/i,'bub'],[/storm|thunder|hurricane|electric|peaks|cliffs/i,'storm'],[/galaxy|cosmic|nebula|night|moon|lunar|star|void|dream|eclipse|celestial|astral|dimension|heaven|space|midnight/i,'star']];
+const fx=s=>(FX.find(([r])=>r.test(s))||[0,'cloud'])[1];
+const FL=[['w',/dragon|wyvern|drake|wyrm|griffin|\broc\b|raven|crow|moth|seraph|phoenix|harpy|bat|dragonfly|fairy|pegasus|owl|godbird|mermaid/i],['h',/dragon|unicorn|minotaur|manticore|wyvern|drake|chimera|basilisk|hydra|cerberus|wyrm/i],['e',/wolf|kitsune|cerberus|werewolf|yeti|bat|vampire|nightmare|horse|dream eater/i],['t',/dragon|wyvern|salamander|serpent|wyrm|kitsune|wolf|manticore|chimera|hydra|basilisk|scarab/i],['f',/phoenix|fire|inferno|lava|ember|\bsun\b|cinder|burning/i],['o',/seraph|light|godbird|celestial|holy|eternal|\bstar\b|moon/i],['a',/deer|\bent\b|forest/i],['k',/kraken|hydra/i]];
+const LIST=`Ice Phoenix|Frozen Sky|Crystal Ice Spikes|Snowflake Trail
+Griffin|Ancient Cloud City|Golden Claw Spikes|Feather Trail
+Unicorn|Rainbow Valley|Crystal Horn Spikes|Rainbow Trail
+Kraken|Deep Ocean|Tentacle Spikes|Bubble Trail
+Kitsune|Spirit Forest|Foxfire Spikes|Blue Flame Trail
+Cerberus|Underworld Gate|Hellstone Spikes|Soulfire Trail
+Hydra|Poison Swamp|Venom Spikes|Toxic Trail
+Pegasus|Celestial Clouds|Cloud Spikes|Starlight Trail
+Basilisk|Cursed Desert|Stone Fang Spikes|Sandstorm Trail
+Manticore|Blood Moon Canyon|Thorn Spikes|Crimson Trail
+Phoenix|Burning Sunrise|Ember Spikes|Ash Trail
+Yeti|Snowy Mountain|Frostbite Spikes|Blizzard Trail
+Werewolf|Full Moon Forest|Silver Fang Spikes|Moonbeam Trail
+Vampire Bat|Gothic Castle|Blood Crystal Spikes|Bat Swarm Trail
+Mermaid Bird|Sunken Palace|Coral Spikes|Ocean Mist Trail
+Thunder Roc|Storm Peaks|Lightning Spikes|Thunder Trail
+Shadow Dragon|Dark Dimension|Obsidian Spikes|Shadow Trail
+Light Seraph|Heaven's Gate|Halo Spikes|Holy Light Trail
+Stone Golem|Ancient Ruins|Boulder Spikes|Dust Trail
+Fairy|Enchanted Garden|Thorn Blossom Spikes|Glitter Trail
+Forest Ent|Emerald Woods|Wooden Root Spikes|Leaf Trail
+Sand Wyrm|Golden Dunes|Sandstone Spikes|Sand Trail
+Crystal Dragon|Crystal Cavern|Diamond Spikes|Shard Trail
+Ghost Griffin|Haunted Sky|Ghostly Spikes|Spirit Trail
+Sea Serpent|Coral Kingdom|Shell Spikes|Aqua Trail
+Lava Golem|Volcano Core|Lava Rock Spikes|Molten Trail
+Star Unicorn|Cosmic Meadow|Star Spikes|Stardust Trail
+Moon Griffin|Lunar Palace|Crescent Spikes|Moon Dust Trail
+Sun Dragon|Solar Temple|Solar Flare Spikes|Sunbeam Trail
+Plague Raven|Rotting Kingdom|Bone Spikes|Green Mist Trail
+Frost Wolf|Glacier Valley|Ice Fang Spikes|Frozen Breath Trail
+Dream Eater|Dream Realm|Nightmare Spikes|Purple Smoke Trail
+Nightmare Horse|Midnight Stable|Dark Iron Spikes|Black Flame Trail
+Celestial Moth|Star Garden|Moonstone Spikes|Glowing Dust Trail
+Lava Salamander|Magma Caves|Firestone Spikes|Spark Trail
+Storm Griffin|Hurricane Cliffs|Wind Blade Spikes|Wind Trail
+Swamp Hydra|Boglands|Bog Fang Spikes|Poison Bubble Trail
+Golden Dragon|Golden Palace|Gold Bar Spikes|Gold Dust Trail
+Silver Phoenix|Silver Sky|Silver Feather Spikes|Silver Spark Trail
+Emerald Basilisk|Emerald Jungle|Green Crystal Spikes|Emerald Trail
+Ruby Wyvern|Ruby Volcano|Ruby Spikes|Red Gem Trail
+Sapphire Drake|Sapphire Sea|Sapphire Spikes|Blue Gem Trail
+Amethyst Owl|Purple Night Forest|Amethyst Spikes|Violet Glow Trail
+Obsidian Crow|Blackstone Tower|Obsidian Shards|Black Smoke Trail
+Rainbow Seraph|Rainbow Heights|Prism Spikes|Prism Trail
+Void Kraken|Void Ocean|Void Tentacle Spikes|Black Hole Trail
+Time Dragon|Clockwork Dimension|Clock Gear Spikes|Time Warp Trail
+Space Phoenix|Galaxy Core|Meteor Spikes|Cosmic Trail
+Solar Griffin|Sun Temple|Solar Crystal Spikes|Solar Flare Trail
+Ancient Sphinx|Forgotten Pyramid|Sand Fang Spikes|Golden Sand Trail
+Minotaur Bird|Labyrinth|Iron Horn Spikes|Dust Cloud Trail
+Harpy Queen|Sky Fortress|Feather Blade Spikes|Wind Slash Trail
+Chimera|Monster Realm|Triple Fang Spikes|Wildfire Trail
+Roc King|Floating Islands|Giant Talon Spikes|Skyburst Trail
+Dragonfly Spirit|Mystic Pond|Glass Wing Spikes|Sparkle Trail
+Ice Dragon|Frozen Volcano|Icicle Spikes|Ice Breath Trail
+Fire Kitsune|Burning Shrine|Flame Fang Spikes|Foxfire Trail
+Spirit Wolf|Spirit Mountains|Spirit Claw Spikes|Wisp Trail
+Cursed Unicorn|Haunted Meadow|Dark Horn Spikes|Cursed Flame Trail
+Coral Phoenix|Reef Kingdom|Coral Feather Spikes|Sea Spark Trail
+Thunder Hydra|Electric Marsh|Electric Fang Spikes|Shock Trail
+Crystal Moth|Crystal Forest|Crystal Wing Spikes|Glitter Dust Trail
+Ancient Dragon|Lost Empire|Ancient Stone Spikes|Rune Trail
+Frost Griffin|Ice Citadel|Frozen Talon Spikes|Frost Trail
+Blood Moon Bat|Red Moon Castle|Crimson Fang Spikes|Blood Mist Trail
+Golden Scarab|Pharaoh's Tomb|Gold Beetle Spikes|Gold Swirl Trail
+Abyssal Serpent|Deep Abyss|Abyss Fang Spikes|Dark Water Trail
+Dream Phoenix|Dream Clouds|Dream Crystal Spikes|Dream Dust Trail
+Inferno Harpy|Firestorm Cliffs|Burning Feather Spikes|Flame Burst Trail
+Moss Golem|Ancient Forest|Mossy Rock Spikes|Pollen Trail
+Crystal Hydra|Crystal Lake|Crystal Fang Spikes|Shimmer Trail
+Arctic Yeti|Polar Wastes|Ice Boulder Spikes|Snow Drift Trail
+Star Dragon|Nebula Kingdom|Meteorite Spikes|Starfall Trail
+Eclipse Griffin|Eclipse Sky|Eclipse Shard Spikes|Darklight Trail
+Rune Raven|Rune Temple|Rune Stone Spikes|Magic Glyph Trail
+Phantom Kitsune|Ghost Village|Spirit Flame Spikes|Phantom Trail
+Coral Kraken|Sunken Reef|Coral Tentacle Spikes|Bubble Burst Trail
+Storm Phoenix|Thundercloud Kingdom|Storm Crystal Spikes|Lightning Trail
+Void Unicorn|Black Star Meadow|Void Horn Spikes|Gravity Trail
+Frost Seraph|Frozen Heaven|Ice Halo Spikes|Snow Glow Trail
+Ember Dragon|Ashen Mountains|Emberstone Spikes|Ember Trail
+Thorn Griffin|Bramble Kingdom|Thorn Talon Spikes|Vine Trail
+Crystal Roc|Diamond Sky|Crystal Talon Spikes|Diamond Dust Trail
+Spirit Deer|Enchanted Woods|Antler Spikes|Firefly Trail
+Volcano Wyvern|Magma Fortress|Volcanic Fang Spikes|Lava Flow Trail
+Moon Kitsune|Moonlit Shrine|Moonstone Spikes|Moonfire Trail
+Sun Phoenix|Golden Horizon|Sun Crystal Spikes|Solar Dust Trail
+Abyssal Moth|Shadow Swamp|Abyss Wing Spikes|Dark Mist Trail
+Frost Kraken|Frozen Ocean|Ice Tentacle Spikes|Frost Bubble Trail
+Celestial Dragon|Astral Palace|Celestial Spikes|Aurora Trail
+Cinder Wolf|Charcoal Forest|Cinder Fang Spikes|Smoke Trail
+Emerald Phoenix|Emerald Sky|Emerald Feather Spikes|Green Flame Trail
+Sapphire Griffin|Sapphire Cliffs|Sapphire Talon Spikes|Blue Spark Trail
+Rune Hydra|Ancient Rune City|Rune Fang Spikes|Magic Trail
+Ghost Dragon|Haunted Mountains|Spectral Spikes|Ghostfire Trail
+Rainbow Manticore|Prism Canyon|Rainbow Thorn Spikes|Color Burst Trail
+Cosmic Kraken|Galaxy Ocean|Cosmic Tentacle Spikes|Nebula Trail
+Eternal Phoenix|Eternal Flame Temple|Eternal Flame Spikes|Rebirth Trail
+Godbird|Divine Realm|Divine Crystal Spikes|Pure Energy Trail`;
+LIST.split('\n').forEach((ln,i)=>{const[cr,bg,sp,tr]=ln.split('|'),f={};FL.forEach(([k,r])=>{if(r.test(cr))f[k]=1});if(!Object.keys(f).length)f.t=1;
+ const P=pal(cr),B=pal(bg),Q=pal(sp),T=pal(tr),k='x'+i,bm=B[0]=='*'?'#f6f':B[0];XS[k]=(c,t,dy)=>ex(c,t,dy,f,P);
+ A('skin',[[7,cr,P[0],k]]);A('trail',[[7,tr,[T[0],T[1],T[3]]]]);A('bg',[[7,bg,[B[2],bm,fx(bg),[B[2],bm,B[1]]]]]);A('pipe',[[7,sp,[Q[0],Q[1],Q[2],'s']]])});
+const SETS=[],PT2=[[/rainbow|prism|spectrum|overdrive/i,['*','#fff','#306','#f6f']],[/gold|trophy|diamond|champion|luxury|victory/i,['#eb3','#fe9','#a70','#fff']],[/glitch|error|static|corrupt|distortion|broken|\blag\b|buffering|tear/i,['#0ff','#f0f','#306','#ff0']],[/neon|cyber|laser|plasma|\bled\b|holo|quantum|energy|electric|glow|data|scan|circuit|digital/i,['#0ef','#f6f','#036','#af0']],[/pixel|8-bit|64-bit|arcade|joystick|controller|cabinet|button|score|combo|crt|retro|loading|progress/i,['#5d5','#ff4','#252','#f55']],[/bubble|candy|balloon|heart|hyperpop|silly|comedy|wacky|foam/i,['#f7c','#7ef','#a37','#ff6']],[/sleep|pajama|dream|pillow|blanket|cloud|soft|pastel|nightcap/i,['#9be','#fff','#468','#fcd']],[/clock|chrono|gear|time|rift/i,['#b83','#fd8','#541','#6df']],[/steel|metal|mecha|robot|pilot|tactical|engine|hangar|speaker|vinyl|\bdj\b/i,['#889','#ccd','#445','#6cf']],[/paper|cookie|popcorn|chip|crumb|wrapper|wooden|hoodie|beanie|round|snack|skate|graffiti|concrete|spray|paint|splash/i,['#c85','#fda','#742','#f8c']]];
+const pl2=s=>{for(const[r,p]of PT2)if(r.test(s))return p;return pal(s)};
+const HT=(n,[m,l,d,a])=>/halo/i.test(n)?[[-4,-12,9,2,a],[-5,-11,1,1,a],[5,-11,1,1,a]]:/crown|tiara/i.test(n)?[[-4,-8,9,3,m],[-4,-10,2,2,a],[0,-11,2,3,a],[3,-10,2,2,a]]:/phones|headset/i.test(n)?[[-5,-8,11,1,d],[-6,-7,2,4,m],[5,-7,2,4,m]]:/helm|hood|kabuto/i.test(n)?[[-5,-9,11,5,m],[-1,-7,5,1,d]]:/beanie|nightcap|\bcap\b/i.test(n)?[[-5,-8,10,4,m],[-1,-10,3,2,a]]:[[-3,-12,7,5,m],[-4,-8,9,2,d],[-3,-9,7,1,a]];
+const GL=(n,[m,l,d,a])=>/round|heart|sleepy|foggy|clock/i.test(n)?[[1,-5,5,4,m],[-3,-4,4,1,d]]:/visor|lens|\bled\b|holo|scan|scoreboard|tactical/i.test(n)?[[-2,-5,10,3,m]]:[[0,-4,8,3,m],[-3,-4,3,1,d]];
+const fx2=s=>/rain/i.test(s)?'storm':/bubble/i.test(s)?'bub':/arcade|cyber|neon|quantum|grid|server|computer|hologram|corrupt|loading|simulation|reactor|data|pixel|vault|studio|dimension/i.test(s)?'rain':fx(s);
+const TL=`0|Cozy Gamer|Bedroom Desk|Hoodie Bird|Soft Spark Trail|Beanie|Round Glasses|Wooden Pipes|Small Paper Wings
+0|Snack Time|Snack Room|Popcorn Bird|Crumb Trail|Chip Hat|Cookie Glasses|Candy Pipes|Wrapper Wings
+0|Retro Arcade|Pixel Arcade|8-Bit Bird|Pixel Dust Trail|Arcade Cap|Pixel Shades|Arcade Cabinet Pipes|Pixel Wings
+0|Sleepy Mode|Cloud Bedroom|Pajama Bird|Dream Bubble Trail|Nightcap|Sleepy Glasses|Pillow Pipes|Blanket Wings
+0|Garden Vibes|Flower Garden|Daisy Bird|Pollen Trail|Flower Crown|Green Round Glasses|Vine Pipes|Leaf Wings
+1|Skate Park|Concrete Skatepark|Skate Hoodie Bird|Wheel Spark Trail|Skate Helmet|Sport Shades|Graffiti Pipes|Board Wings
+1|Bubble Pop|Bubblegum City|Bubblegum Bird|Bubble Trail|Bubble Hat|Pink Heart Glasses|Bubble Pipes|Balloon Wings
+1|Arcade Champion|Neon Arcade|Joystick Bird|Score Burst Trail|Gamer Headset|LED Glasses|Button Pipes|Controller Wings
+1|Rainy Day|City in the Rain|Raincoat Bird|Raindrop Trail|Umbrella Hat|Foggy Glasses|Drainpipe Pipes|Puddle Wings
+1|Space Tourist|Tourist Moon Base|Space Suit Bird|Star Ping Trail|Tourist Visor|Round Space Glasses|Satellite Pipes|Mini Rocket Wings
+2|Neon Street|Neon Alley|Streetwear Bird|Neon Drip Trail|Glow Cap|Neon Visor|Light Tube Pipes|Electric Wings
+2|Low-Poly Legend|Polygon Valley|Low-Poly Bird|Triangle Trail|Polygon Crown|Angular Shades|Faceted Pipes|Geometric Wings
+2|Glitch Mode|Corrupted Computer World|Glitch Bird|Data Error Trail|Broken Headset|Static Glasses|Glitch Pipes|Pixel Glitch Wings
+2|Cloud Surfer|Sky Skatepark|Cloud Hoodie Bird|Wind Streak Trail|Cloud Beanie|Blue Sport Shades|Cloud Pipes|Airfoil Wings
+2|Retro Tech|Old Computer Room|CRT Bird|Scanline Trail|Floppy Disk Hat|Green Screen Glasses|Keyboard Pipes|Circuit Wings
+3|Cyber Runner|Cyber City|Cyber Suit Bird|Data Stream Trail|Cyber Helmet|Hologram Visor|Laser Pipes|Energy Wings
+3|Midnight DJ|Rooftop Club|DJ Bird|Soundwave Trail|DJ Headphones|Beat Glasses|Speaker Pipes|Vinyl Wings
+3|Frostbyte|Frozen Computer Lab|Ice Tech Bird|Digital Snow Trail|Ice Headset|Frost Visor|Frozen Circuit Pipes|Holographic Wings
+3|Street Artist|Graffiti District|Paint-Splashed Bird|Color Splash Trail|Spray Can Hat|Paint Lens Glasses|Graffiti Pipes|Brushstroke Wings
+3|Mecha Pilot|Robot Hangar|Mini Mecha Bird|Engine Spark Trail|Pilot Helmet|Tactical Visor|Steel Pipes|Metal Wings
+4|Hologram Hero|Hologram City|Holo Bird|Prism Beam Trail|Holo Crown|Holographic Glasses|Prism Pipes|Light Wings
+4|Royal Streetwear|Golden Rooftop|Gold Jacket Bird|Gold Drip Trail|Gem Cap|Gold Frame Shades|Gold Chrome Pipes|Luxury Wings
+4|Arcade Overload|Ultimate Arcade|Boss-Level Bird|Combo Burst Trail|Arcade King Crown|Scoreboard Glasses|High-Score Pipes|Joystick Wings
+4|Digital Samurai|Neon Dojo|Tech Armor Bird|Blade Pixel Trail|Digital Kabuto|Red Scan Glasses|Katana Pipes|Cyber Fan Wings
+4|Cosmic DJ|Galaxy Dancefloor|Cosmic DJ Bird|Galaxy Beat Trail|Star Headphones|Cosmic Shades|Bass Speaker Pipes|Nebula Wings
+5|Quantum Hacker|Quantum Grid|Quantum Bird|Warp Code Trail|Quantum Crown|Reality Visor|Quantum Pipes|Glitch Portal Wings
+5|Dreamcore|Floating Dream House|Dream Bird|Floating Star Trail|Dream Halo|Pastel Dream Glasses|Cloud Castle Pipes|Soft Light Wings
+5|Void Tech|Blackout Dimension|Void Armor Bird|Dark Matter Trail|Void Helmet|Black Mirror Glasses|Dark Energy Pipes|Void Wings
+5|Hyperpop|Color Explosion City|Hyperpop Bird|Rainbow Laser Trail|Candy Crown|Starburst Glasses|Neon Candy Pipes|Spectrum Wings
+5|Golden Glitch|Golden Data Vault|Gold Glitch Bird|Gold Pixel Trail|Glitch Tiara|Golden Static Glasses|Gold Error Pipes|Golden Code Wings
+6|Grand Champion|Champion Stadium|Trophy Bird|Victory Burst Trail|Champion Crown|Diamond Sport Glasses|Trophy Pipes|Victory Wings
+6|Neon Overlord|Neon Megacity|Overlord Bird|Plasma Trail|Neon Royal Helmet|Laser Eyes Glasses|Plasma Pipes|Overlord Wings
+6|Time Traveler|Clockwork City|Time Traveler Bird|Time Ripple Trail|Chrono Hat|Clock Lens Glasses|Gear Pipes|Time Rift Wings
+6|Digital Phantom|Haunted Server|Phantom Gamer Bird|Ghost Data Trail|Phantom Hood|Spectral Glasses|Haunted Circuit Pipes|Phantom Wings
+6|Ultimate Creator|Creator Studio|Builder Bird|Rainbow Blueprint Trail|Creator Cap|Designer Glasses|Blueprint Pipes|Creative Wings
+7|64-Bit Supreme|Ultra Pixel World|64-Bit Bird|Mega Pixel Trail|Pixel King Crown|64-Bit Shades|Ultra Pixel Pipes|64-Bit Wings
+7|Meme Machine|Meme Dimension|Silly Grin Bird|Laugh Burst Trail|Giant Foam Hat|Wacky Eyes Glasses|Comedy Pipes|Floppy Wings
+7|Infinite Loading|Endless Loading Screen|Loading Bird|Loading Bar Trail|Spinner Hat|Buffering Glasses|Progress Pipes|Lag Wings
+7|Glitched Reality|Broken Simulation|Reality Error Bird|Screen Tear Trail|Error Crown|Distortion Glasses|Corrupt Pipes|Broken Pixel Wings
+7|Rainbow Overdrive|Rainbow Reactor|Spectrum Bird|Rainbow Overdrive Trail|Prism Crown|Color Shift Glasses|Rainbow Reactor Pipes|Spectrum Wings`;
+TL.split('\n').forEach((ln,k)=>{const[r0,n,bg,sk,tr,ht,gs,pp,wn]=ln.split('|'),q=+r0,mk=(cat,l)=>{const a=I.length;A(cat,l);const it=I[a];it.pe=it.mk=1;it.set=n;return it.id},Ps=pl2(sk),B=pl2(bg),T=pl2(tr),Hp=pl2(ht),Gp=pl2(gs),Pp=pl2(pp),Wp=pl2(wn),bm=B[0]=='*'?'#f6f':B[0],cl=/hoodie|suit|armor|jacket|pajama|coat|mecha|tech|builder|trophy|overlord|\bdj\b/i.test(sk),gg=/glitch|error|quantum|static|corrupt|crt/i.test(sk),key='m'+k;
+ XS[key]=(c,t)=>{if(cl)R(c,-6,0,12,2,Ps[3],t);if(gg){R(c,-8+t%7,-3,4,2,Ps[3],t);R(c,2-t%5,2,5,2,Ps[1],t)}};
+ const ids=[mk('bg',[[q,bg,[B[2],bm,fx2(bg),[B[2],bm,B[1]]]]]),mk('skin',[[q,sk,Ps[0],key]]),mk('trail',[[q,tr,[T[0],T[1],T[3]]]]),mk('hat',[[q,ht,HT(ht,Hp)]]),mk('glasses',[[q,gs,GL(gs,Gp)]]),mk('pipe',[[q,pp,[Pp[0],Pp[1],Pp[2]]]]),mk('wings',[[q,wn,wg(Wp[0],Math.min(7,q+1))]])];
+ SETS.push({k:SETS.length,n,r:q,ids})});
+const sr=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const mkt=p=>{const r=sr(p*7919+13),o=[],pk=rs=>{const l=SETS.filter(s=>rs.includes(s.r)&&!o.some(x=>x.s==s));return l[r()*l.length|0]};
+ for(let i=0;i<3;i++){const s=pk([0,1,2]);o.push({s,half:r()<.3})}
+ if(r()<.45)o.push({s:pk([3,4,5,6]),half:0});if(r()<.07)o.push({s:pk([7]),half:0});return o.sort((a,b)=>a.s.r-b.s.r)};
+const spr=(s,h)=>{if(s.r==7)return[0,900];const c=Math.round(7*RV[s.r]*4.5/(h?2:1));return[c,Math.max(1,Math.ceil(c/1000))]};
+const setCard=o=>{const s=o.s,[c,g]=spr(s,o.half),own=s.ids.every(d=>S.inv[d]>0);return `<div class="p" style="border-color:${RC[s.r]}"><b style="color:${RC[s.r]}">${s.n}</b> <small>${RN[s.r]}${o.half?' | HALF PRICE':''}</small><div class="mini" style="grid-template-columns:repeat(7,1fr)">${s.ids.map(d=>`<canvas data-i="${d}" width="40" height="30" style="border:2px solid ${RC[s.r]}"></canvas>`).join('')}</div><small>${s.ids.map(d=>M[d].name).join(', ')}</small><br>${own?'OWNED':`<button class="b" onclick="buySet(${s.k},${o.half?1:0})">${s.r==7?g+'◆ only':c+'● or '+g+'◆'}</button>`}</div>`};
+const mktH=()=>{const p=Math.floor(Date.now()/1728e5),l=(p+1)*1728e5-Date.now(),h=Math.floor(l/36e5);return `<div class="p"><b>THE MARKET</b><br><small>Full theme sets. Refreshes in ${h>=24?Math.floor(h/24)+'d ':''}${h%24}h (every 2 days)</small></div>`+mkt(p).map(setCard).join('')};
+function buySet(k,h){const s=SETS[k],[c,g]=spr(s,h),give=()=>{s.ids.forEach(d=>S.inv[d]=S.inv[d]||1);save();toast('Set purchased!');UI.shop();upd()};
+ if(s.r==7)ask(`Buy the ${s.n} set for ${g} pems?`,()=>{if(S.g<g)return toast('Not enough pems!');S.g-=g;give()});
+ else ask(`Buy the ${s.n} set? Pay with:`,()=>{if(S.p<c)return toast('Not enough poins!');S.p-=c;give()},[`${c} POINS`,`${g} PEMS`],()=>{if(S.g<g)return toast('Not enough pems!');S.g-=g;give()})}
+/* ---------- procedural cosmetics: 64 colours x 24 styles = 1536 per category ---------- */
+const CLS='Crimson 350 75 45;Scarlet 6 90 50;Ruby 345 80 38;Coral 12 85 62;Salmon 8 80 72;Rose 335 75 65;Pink 330 85 75;Magenta 310 85 50;Fuchsia 300 90 55;Orchid 290 55 65;Lavender 265 60 78;Violet 270 70 55;Purple 280 65 38;Indigo 250 65 40;Plum 300 40 35;Navy 225 70 25;Cobalt 215 85 45;Royal 230 75 55;Azure 205 90 55;Sky 195 85 72;Cyan 185 90 55;Aqua 175 80 65;Teal 175 80 32;Turquoise 170 70 55;Mint 150 70 75;Emerald 145 75 40;Jade 155 60 45;Green 120 65 45;Lime 85 80 55;Olive 70 50 35;Moss 100 40 35;Chartreuse 75 90 55;Lemon 55 95 65;Yellow 50 95 55;Amber 40 95 50;Gold 45 90 52;Honey 38 80 62;Orange 28 95 55;Tangerine 22 95 58;Rust 15 70 38;Copper 20 60 45;Bronze 30 55 40;Brown 25 45 30;Chocolate 20 55 22;Sand 40 45 72;Cream 48 70 88;Ivory 55 40 92;Snow 200 30 94;Silver 220 8 75;Steel 215 15 55;Slate 215 20 38;Gray 0 0 50;Charcoal 220 10 22;Onyx 260 15 12;Midnight 240 60 15;Frost 190 60 85;Ocean 200 80 38;Dusk 280 45 45;Dawn 20 85 78;Ember 10 90 42;Toxic 100 100 50;Neon 160 100 55;Berry 330 65 38;Mocha 28 35 40'.split(';').map(q=>{const a=q.split(' ');return[a[0],+a[1],+a[2],+a[3]]});
+const ghs=(h,s,l)=>`hsl(${(h+360)%360},${Math.min(100,s)}%,${Math.max(4,Math.min(96,l))}%)`,gpl=([,h,s,l],k)=>[ghs(h,s,l),ghs(h,s,l+22),ghs(h,s,l-20),ghs(h+40+k*10,s+10,l+8)];
+const rr=i=>{const x=Math.sin(i*12.9898+78.233)*43758.5453,f=x-Math.floor(x);return f<.3?0:f<.55?1:f<.75?2:f<.88?3:f<.95?4:f<.99?5:6};
+let GN=0;
+const gen=(cat,nm,fn)=>{const l=[];CLS.forEach(c=>nm.split(',').forEach((n,j)=>{const P=gpl(c,j),r=rr(l.length*7+j+cat.length*131);l.push([r,`${c[0]} ${n}`,...fn(P,j,c,r)])}));const a=I.length;A(cat,l);I.slice(a).forEach(i=>i.gx=1)};
+const SKP=[[],[[-6,-5,2,10,1],[-2,-5,2,10,1]],[[-7,-3,9,2,1],[-7,1,9,2,1]],[[-5,-3,2,2,1],[-1,0,2,2,1],[-4,2,2,2,1]],[[-6,-2,1,1,1],[-3,-3,1,1,1],[-1,1,1,1,1],[-5,2,1,1,1],[0,-2,1,1,1]],[[-6,1,8,4,0]],[[-1,-5,3,3,1]],[[-3,-7,2,2,2],[0,-7,2,2,2]],[[0,0,3,3,2]],[[-6,-5,9,2,2]],[[-6,-4,2,2,1],[-2,-4,2,2,1],[-4,-2,2,2,1],[0,-2,2,2,1],[-6,0,2,2,1],[-2,0,2,2,1]],[[-6,-3,2,1,1],[-4,-2,2,1,1],[-2,-3,2,1,1],[0,-2,2,1,1]],[[-5,-5,1,10,1],[-1,-5,1,10,2]],[[-6,-4,1,1,2],[-3,-2,1,1,2],[-1,-4,1,1,2],[-5,0,1,1,2],[0,1,1,1,2],[-3,3,1,1,2]],[[-9,-1,3,3,2]],[[-6,-5,1,10,2],[0,-5,1,10,2]],[[-4,-3,1,1,2],[-1,-3,1,1,2],[-4,0,1,1,2],[-1,0,1,1,2]],[[-7,2,14,3,1]],[[-5,-4,1,1,0],[-2,0,1,1,0],[-6,2,1,1,0]],[[-5,-5,1,4,1],[-3,2,3,1,1]],[[-6,-4,3,3,2],[-2,0,3,3,1]],[[-7,-1,3,1,1],[-4,0,3,1,1],[-1,-1,3,1,1]],[[-5,-3,3,1,2],[-4,-4,1,3,2]],[[-5,-3,2,1,2],[-3,-3,2,1,2],[-5,-2,5,1,2],[-4,-1,3,1,2]]];
+const HTS=[(m,l,d,a)=>[[-4,-8,9,3,m],[3,-6,6,2,d]],(m,l,d,a)=>[[-5,-8,10,4,m],[-1,-10,3,2,a]],(m,l,d,a)=>[[-5,-8,11,2,d],[-3,-14,7,6,m]],(m,l,d,a)=>[[-4,-8,9,3,m],[-4,-10,2,2,a],[0,-11,2,3,a],[3,-10,2,2,a]],(m,l,d,a)=>[[-3,-8,7,1,m],[-1,-10,3,2,a]],(m,l,d,a)=>[[-5,-9,11,5,m],[-1,-7,5,1,d]],(m,l,d,a)=>[[-5,-10,2,5,m],[-6,-13,2,3,a],[4,-10,2,5,m],[5,-13,2,3,a]],(m,l,d,a)=>[[-6,-8,12,2,m],[-3,-11,7,3,m],[-1,-14,3,3,m],[0,-12,1,1,a]],(m,l,d,a)=>[[-4,-12,9,4,m],[-3,-8,7,2,l]],(m,l,d,a)=>[[-3,-8,7,2,m],[-2,-10,5,2,m],[-1,-12,3,2,a]],(m,l,d,a)=>[[-4,-12,9,2,a],[-5,-11,1,2,a],[5,-11,1,2,a]],(m,l,d,a)=>[[-1,-12,3,5,m],[-3,-10,2,3,a],[2,-10,2,3,a]],(m,l,d,a)=>[[0,-14,1,6,d],[-1,-15,3,2,a]],(m,l,d,a)=>[[-4,-8,9,2,m],[-5,-10,11,1,a],[0,-11,1,3,d]],(m,l,d,a)=>[[-3,-8,3,3,m],[1,-8,3,3,m],[0,-7,1,1,a]],(m,l,d,a)=>[[-1,-10,3,3,a],[-3,-9,2,2,m],[2,-9,2,2,m],[0,-9,1,1,l]],(m,l,d,a)=>[[-5,-6,11,2,m]],(m,l,d,a)=>[[-4,-8,9,1,d],[2,-7,7,2,m]],(m,l,d,a)=>[[-4,-8,9,3,m],[-1,-11,1,3,a]],(m,l,d,a)=>[[-6,-8,11,2,m],[-2,-10,5,2,m],[-1,-11,1,1,a]],(m,l,d,a)=>[[-5,-8,11,2,l],[-3,-11,7,3,m]],(m,l,d,a)=>[[-7,-8,15,2,m],[-3,-12,7,4,m],[-3,-9,7,1,a]],(m,l,d,a)=>[[-6,-8,12,3,d],[-3,-9,7,1,l],[-1,-7,3,1,'#fff']],(m,l,d,a)=>[[0,-12,1,4,'#3a3'],[-2,-11,2,2,'#5c5'],[1,-11,2,2,'#5c5'],[-3,-8,7,1,m]]];
+const GLS=[(m,l,d)=>[[0,-4,8,3,m],[-3,-4,3,1,d]],(m,l,d)=>[[1,-5,5,4,m],[-3,-4,4,1,d]],(m,l,d)=>[[0,-5,7,5,m]],(m,l,d)=>[[-2,-5,10,3,m]],(m,l,d)=>[[2,-5,4,4,l],[-3,-3,5,1,d]],(m,l,d)=>[[-1,-5,9,5,d],[0,-4,7,3,m]],(m,l,d)=>[[0,-5,3,2,m],[3,-5,3,2,m],[0,-3,6,2,m],[1,-1,4,1,m]],(m,l,d)=>[[2,-6,1,6,m],[0,-4,5,2,m]],(m,l,d)=>[[0,-4,8,2,m],[1,-2,6,2,l],[-3,-4,3,1,d]],(m,l,d)=>[[0,-5,4,4,m],[4,-5,4,4,m],[-3,-4,3,1,d]],(m,l,d)=>[[0,-4,8,3,l],[1,-3,2,1,d],[5,-3,2,1,d]],(m,l,d)=>[[-3,-4,13,3,m]],(m,l,d)=>[[0,-3,8,1,m],[-3,-3,3,1,d]],(m,l,d)=>[[0,-4,8,2,m],[0,-5,2,1,m],[6,-5,2,1,m]],(m,l,d)=>[[1,-5,4,1,m],[0,-4,6,3,m],[1,-1,4,1,m]],(m,l,d)=>[[2,-5,5,4,l],[3,-4,2,1,'#fff']],(m,l,d)=>[[-2,-5,10,3,m],[-4,-4,2,1,d]],(m,l,d)=>[[-6,-5,13,4,d],[0,-4,7,2,m]],(m,l,d)=>[[0,-6,3,6,m],[3,-5,4,3,l]],(m,l,d)=>[[0,-4,8,1,d],[1,-3,6,2,m]],(m,l,d)=>[[3,-6,2,1,m],[2,-5,4,1,m],[1,-4,6,2,m],[2,-2,4,1,m],[3,-1,2,1,m]],(m,l,d)=>[[0,-4,3,3,m],[3,-4,3,3,l],[6,-4,3,3,m]],(m,l,d)=>[[0,-5,8,5,d],[1,-4,6,3,l]],(m,l,d)=>[[-3,-6,12,6,d],[-2,-5,10,4,m]]];
+const SKN='Classic,Striped,Banded,Spotted,Freckled,Belly,Masked,Crested,Cheeked,Capped,Checkered,Zigzag,Ringed,Speckled,Tipped,Stitched,Dotted,Shaded,Glitter,Scarred,Painted,Wavy,Starry,Hearted',
+TRN='Streak,Comet,Spark,Mist,Blaze,Ribbon,Dust,Wisp,Flare,Glimmer,Ripple,Stream,Drift,Trace,Flash,Pulse,Glow,Shimmer,Echo,Aurora,Swirl,Burst,Haze,Vapor',
+HTN='Cap,Beanie,Top Hat,Crown,Tiara,Helmet,Horns,Wizard Hat,Chef Hat,Cone,Halo,Mohawk,Antenna,Propeller,Bow,Flower,Headband,Visor,Fez,Beret,Bucket Hat,Cowboy Hat,Pirate Hat,Sprout',
+GLN='Shades,Round,Square,Visor,Monocle,Goggles,Heart,Star,Wayfarers,Aviators,Pixel Specs,Wide,Slim,Cat-Eye,Hex,Lens,Sport,Mask,Scouter,Half-Rim,Diamond,Triple,Frames,Ski Goggles',
+WGN='Feather,Leaf,Bat,Angel,Flame,Dragon,Fairy,Bee,Butterfly,Moth,Crystal,Cloud,Paper,Ghost,Blade,Petal,Hawk,Jet,Spark,Storm,Shadow,Ribbon,Origami,Prism',
+BGN='Sky,Meadow,Dawn Sky,Ocean,Lagoon,Desert,Canyon,Forest,Jungle,Tundra,Glacier,Volcano,Nebula,Galaxy,Cavern,Storm Front,Rainfall,Orchard,Harbor,Skyline,Prairie,Marsh,Reef,Summit',
+PPN='Pipes,Brick Pipes,Ice Pipes,Steel Pipes,Candy Pipes,Lava Pipes,Gold Pipes,Crystal Pipes,Bamboo,Stone Pipes,Neon Pipes,Rusty Pipes,Marble Pipes,Coral Pipes,Obsidian Pipes,Glass Pipes,Wood Pipes,Chrome Pipes,Mossy Pipes,Metal Pipes,Spiked Pipes,Thorn Pipes,Fang Pipes,Bone Pipes',
+FXS=['cloud','cloud','cloud','bub','bub','cloud','ember','leaf','leaf','snow','snow','ember','star','star','bub','storm','storm','leaf','bub','rain','cloud','leaf','bub','cloud'];
+gen('skin',SKN,(P,j,c,r)=>{const k='g'+GN++,rc=SKP[j],pc=[P[1],P[2],P[3]];XS[k]=(cx,t)=>{rc.forEach(([x,y,w,h,q])=>R(cx,x,y,w,h,pc[q],t));if(r>3&&t%14<5)R(cx,-6+t%11,-4+t%7,1,1,'#fff',t)};return[P[0],k]});
+gen('trail',TRN,(P,j,c)=>[[P[0],P[1],ghs(c[1]+j*12,c[2],c[3]+10)]]);
+gen('hat',HTN,(P,j)=>[HTS[j](...P)]);
+gen('glasses',GLN,(P,j)=>[GLS[j](...P)]);
+gen('wings',WGN,(P,j)=>{const[m,l,d,a]=P;return[wg(m,1+j%6).concat([[],[[-11,-1,4,2,a]],[[-13,-5,3,3,l],[-9,-8,5,2,l]],[[-8,-1,5,2,d]]][j%4])]});
+gen('bg',BGN,(P,j,c)=>{const[m,l,d]=P,[,h,s,L]=c,dk=j==12||j==13;return[[dk?ghs(h,s,10):j%2?d:m,dk?m:j%2?m:l,FXS[j],[ghs(h,s,L-28),ghs(h,s,L-8),ghs(h,s,L+14)]]]});
+gen('pipe',PPN,(P,j)=>[[P[0],P[1],P[2]].concat(j>19?['s']:[])]);
+/* shop + locker filters: rarity, search, hide owned, paging */
+const FS={shop:{r:-1,q:'',pg:0,o:0},lock:{r:-1,q:'',pg:0,o:0},trd:{r:-1,q:'',pg:0,o:0}},PG=24;
+function fset(w,k,v){const f=FS[w];f[k]=v;if(k!='pg')f.pg=0;UI[{shop:'shop',lock:'locker',trd:'trade'}[w]]()}
+const fbar=w=>{const f=FS[w];return `<div class="p" style="grid-column:1/-1"><select onchange="fset('${w}','r',+this.value)" style="font:inherit;font-size:.9em"><option value="-1">All rarities</option>${RN.slice(0,7).map((n,i)=>`<option value="${i}" ${f.r==i?'selected':''}>${n}</option>`).join('')}</select> <input type="text" value="${f.q}" placeholder="Search name" onchange="fset('${w}','q',this.value)" style="width:42%">${w=='shop'?` <button class="b ${f.o?'g':''}" onclick="fset('shop','o',${f.o?0:1})">HIDE OWNED</button>`:''}</div>`};
+const listH=(w,items,cf)=>{const f=FS[w],q=f.q.toLowerCase(),a=items.filter(i=>(f.r<0||i.rar==f.r)&&(!q||i.name.toLowerCase().includes(q))&&!(f.o&&S.inv[i.id])),n=Math.max(1,Math.ceil(a.length/PG));f.pg=Math.min(f.pg,n-1);
+ return fbar(w)+a.slice(f.pg*PG,(f.pg+1)*PG).map(cf).join('')+`<div class="p" style="grid-column:1/-1;text-align:center">${a.length} items<br><button class="b" onclick="fset('${w}','pg',${Math.max(0,f.pg-1)})">PREV</button> ${f.pg+1}/${n} <button class="b" onclick="fset('${w}','pg',${Math.min(n-1,f.pg+1)})">NEXT</button></div>`};
+/* ---------- Black Market: Ancient items (secret codes only) ---------- */
+const anA=(cat,l)=>{const a=I.length;A(cat,l);return I.slice(a).map(it=>{it.pe=it.mk=it.an=1;return it.id})};
+const[FART]=anA('trail',[[8,'Fart Effect',['#9a8a3a','#6a5a20']]]);M[FART].fart=1;
+const[BBS]=anA('skin',[[8,'BuddyBoy Rainbow','*']]),[BBB]=anA('bg',[[8,'BuddyBoy Face',['#2a1a4a','#ff9ad5','face',['#3a2a4a','#7a4a9a','#ffd23f']]]]),[ILB]=anA('bg',[[8,'I Love Pixel Fly',['#ff6fa0','#ffd1e8','snow',['#a02050','#ff6fa0','#fff'],'I LOVE|PIXEL FLY']]]);
+const BMC={james:{g:50,msg:'+50 pems!'},farthog:{i:[FART],msg:'Unlocked the Fart Effect (Ancient)! Equip the trail in your Locker.'},buddyboy:{i:[BBS,BBB],msg:'Unlocked the BuddyBoy Rainbow skin and BuddyBoy Face background (Ancient)!'},ilovepixelfly:{g:25,p:500,i:[ILB],msg:'+25 pems, +500 poins and the I Love Pixel Fly background (Ancient)!'}};
+/* ---------- seasonal shop (Thanksgiving) ---------- */
+const seA=(cat,l)=>{const a=I.length;A(cat,l);return I.slice(a).map(it=>{it.pe=it.mk=1;it.se='tg';return it.id})};
+const tkx=p=>(c,t)=>{for(let i=0;i<4;i++)R(c,-14+(i%2),-8+i*3,5,2,p[i%p.length],t);R(c,-12,-11,3,2,p[1],t);R(c,7,2,2,3,'#d22',t)};
+XS.tg1=tkx(['#a0301c','#e8a02f','#c0561e']);XS.tg2=tkx(['#fc3','#fff7b0','#e8a02f']);XS.tg3=tkx(['*','#fff','#f6f']);
+const fan=(a,b,c)=>[[-9,-4,6,3,a],[-13,-7,4,3,b],[-12,-3,4,3,c],[-15,-5,3,3,b]];
+/* theme pack: 7 matching items */
+const TGP=[
+...seA('skin',[[4,'Harvest Turkey','#9a5a2a','tg1']]),
+...seA('bg',[[4,'Harvest Farm',['#e8833a','#ffd9a0','leaf',['#6b3a12','#c9822b','#f2b84b']]]]),
+...seA('trail',[[4,'Falling Leaves',['#d2691e','#e8a02f','#a0301c']]]),
+...seA('hat',[[4,'Pilgrim Hat',[[-5,-8,11,2,'#222'],[-3,-14,7,6,'#222'],[-3,-10,7,1,'#6b4a2a'],[-1,-10,3,1,'#fd3']]]]),
+...seA('glasses',[[4,'Cranberry Specs',[[1,-5,5,4,'#a1123a'],[-3,-4,4,1,'#6b0c26']]]]),
+...seA('pipe',[[4,'Corn Stalk',['#e8b830','#ffe27a','#8a6410']]]),
+...seA('wings',[[4,'Tail Feather Fan',fan('#c0561e','#e8a02f','#a0301c')]])];
+/* single items */
+const TGS=[
+...seA('skin',[[2,'Pie Bird','#d98a3a'],[3,'Cranberry Bird','#a1123a'],[5,'Golden Turkey','#fc3','tg2'],[6,'Mythic Turkey','#7a3a1a','tg3']]),
+...seA('bg',[[2,'Autumn Forest',['#c8561e','#f6c26b','leaf',['#5a3a12','#b8741f','#e8a02f']]],[4,'Harvest Moon',['#1a0f2e','#d98a2b','star',['#3a1f10','#7a4a1a','#d98a2b']]]]),
+...seA('trail',[[0,'Dry Leaves',['#a0602a','#c98a3a']],[3,'Pie Crumbs',['#e8b866','#f6d9a0','#a0602a']],[5,'Golden Gravy',['#fc3','#a5521c','#fff']]]),
+...seA('hat',[[0,'Acorn Cap',[[-4,-8,9,3,'#8a5a2a'],[-1,-10,3,2,'#5a3a1a']]],[2,'Pie Slice Hat',[[-4,-8,9,3,'#e8b866'],[-3,-10,7,2,'#c0561e'],[-1,-11,3,1,'#fff']]],[4,'Cornucopia',[[-5,-9,4,3,'#c68a3a'],[-3,-11,3,3,'#e33'],[0,-12,3,3,'#fc3'],[2,-10,3,3,'#3a3'],[-2,-8,6,2,'#c68a3a']]],[6,'Feast Crown',[[-5,-8,11,3,'#fc3'],[-5,-11,2,3,'#fc3'],[-1,-12,3,4,'#e33'],[3,-11,2,3,'#fc3'],[0,-14,1,2,'#3a3']]]]),
+...seA('glasses',[[1,'Pie Spectacles',[[1,-5,5,4,'#e8a02f'],[-3,-4,4,1,'#8a5a2a']]]]),
+...seA('pipe',[[1,'Hay Bale',['#d9b44a','#f3dc86','#9a7a20']],[3,'Cranberry Sauce',['#a1123a','#ff6b8a','#5a0a20']]]),
+...seA('wings',[[3,'Autumn Leaf Wings',wg('#d2691e',3)],[5,'Golden Feather Wings',fan('#fc3','#fff7b0','#e8a02f')]])];
+const SEAS=[{id:'tg',n:'THANKSGIVING',f:1101,t:1130,col:'#ff9a3c',
+ pack:{n:'Harvest Feast',c:5500,g:6,ids:TGP},singles:TGS,pool:[...TGP,...TGS],
+ boxes:[{id:'tgb1',n:'Harvest Box',c:1200,w:[40,30,18,9,3,0,0,0]},{id:'tgb2',n:'Feast Box',c:15,g:1,w:[0,0,10,30,35,18,7,0]}]}];
+SEAS.forEach(s=>s.boxes.forEach(b=>b.pool=()=>s.pool.map(d=>M[d]).filter(i=>b.w[i.rar]>0)));
+const curSeas=()=>{const d=new Date(),n=(d.getMonth()+1)*100+d.getDate();return SEAS.find(s=>n>=s.f&&n<=s.t)};
+const seLeft=s=>{const e=new Date(new Date().getFullYear(),(s.t/100|0)-1,s.t%100,23,59,59),l=Math.max(0,e-Date.now());return{d:Math.floor(l/864e5),h:Math.floor(l%864e5/36e5)}};
+const tdk=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
+/* free daily gift: random per day, same result if you reload */
+function giftRoll(s){const r=sr(tdk()*31+s.id.charCodeAt(0)*7919+s.id.charCodeAt(1)),x=r();
+ if(x<.5)return{k:'p',v:150+(r()*7|0)*50};
+ if(x<.62)return{k:'g',v:1+(r()*2|0)};
+ const l=s.pool.filter(d=>M[d].rar<=3&&!S.inv[d]);return l.length?{k:'i',v:l[r()*l.length|0]}:{k:'p',v:300}}
+function claimGift(){const s=curSeas();if(!s)return;S.se=S.se||{};const k=tdk(),st=S.se[s.id]||(S.se[s.id]={g:0,n:0});if(st.g==k)return toast('Already claimed today');
+ const g=giftRoll(s);let h,col='#ffd23f',it;st.g=k;st.n++;
+ if(g.k=='p'){S.p+=g.v;h=`FREE GIFT!<br><br>+${g.v} poins`}else if(g.k=='g'){S.g+=g.v;h=`FREE GIFT!<br><br>+${g.v} pems`}
+ else{it=M[g.v];S.inv[it.id]=1;col=RC[it.rar];h=`FREE GIFT!<br><canvas id="rc" width="40" height="30"></canvas><br>${it.name}<br><span style="color:${col}">${RN[it.rar]}</span>`}
+ save();upd();sfx('s');const rb=$('#rvb');rb.style.width='';rb.style.borderColor=col;$('#rv').style.setProperty('--rc',col);rb.innerHTML=h;$('#rok').style.display='';$('#rv').classList.add('on');if(it)icon(it,$('#rc'));UI.shop()}
+function openSBox(id){const s=curSeas();if(!s)return toast('This event is over');const b=s.boxes.find(x=>x.id==id),k=b.g?'g':'p';
+ ask(`Open ${b.n} for ${b.c} ${b.g?'pems':'poins'}?`,()=>{if(S[k]<b.c)return toast('Not enough!');S[k]-=b.c;const pl=b.pool();
+  let r=Math.random()*b.w.reduce((a,c)=>a+c),ri=0;for(;ri<7;ri++){if((r-=b.w[ri])<0)break}
+  let l=pl.filter(i=>i.rar==ri);if(!l.length)l=pl;const it=l[Math.random()*l.length|0],dup=S.inv[it.id]>0;
+  S.inv[it.id]=(S.inv[it.id]||0)+1;save();upd();spin(b,it,it.rar,dup);if(UI[scr])UI[scr]()})}
+function buyPack(){const s=curSeas();if(!s)return toast('This event is over');const P=s.pack,give=()=>{P.ids.forEach(d=>S.inv[d]=S.inv[d]||1);save();toast('Theme pack unlocked!');UI.shop();upd()};
+ ask(`Buy the ${P.n} pack? Pay with:`,()=>{if(S.p<P.c)return toast('Not enough poins!');S.p-=P.c;give()},[`${P.c} POINS`,`${P.g} PEMS`],()=>{if(S.g<P.g)return toast('Not enough pems!');S.g-=P.g;give()})}
+const MON=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const seasH=()=>{const s=curSeas();
+ if(!s){const n=SEAS[0];return `<div class="p"><b>SEASONAL SHOP</b><br><small>No event is running right now.<br>${n.n} returns ${MON[n.f/100|0]} ${n.f%100}.<br>Seasonal items you own stay in your Locker.</small></div>`}
+ const L=seLeft(s),st=S.se[s.id]||{g:0,n:0},got=st.g==tdk(),pk=s.pack,own=pk.ids.every(d=>S.inv[d]>0),cv=d=>`<canvas data-i="${d}" width="40" height="30" style="border:2px solid ${RC[M[d].rar]}"></canvas>`;
+ const bx=s.boxes.map(b=>{const t=b.w.reduce((a,c)=>a+c),pl=b.pool();return `<div class="p" style="border-color:${s.col}"><b style="color:${s.col}">${b.n}</b> ${b.c}${b.g?'◆':'●'} <button class="b" onclick="openSBox('${b.id}')">OPEN</button><br>${b.w.map((w,i)=>w?`<span style="color:${RC[i]}">${RN[i]} ${Math.round(w/t*100)}%</span>`:'').filter(Boolean).join(' | ')}<div class="mini">${pl.slice(0,24).map(i=>cv(i.id)).join('')}</div><small>${pl.length} ${s.n} items can drop</small></div>`}).join('');
+ return `<div class="p" style="border-color:${s.col}"><b style="color:${s.col}">${s.n} EVENT</b><br><small>Limited-time items. Ends in ${L.d}d ${L.h}h</small></div>`+
+ `<div class="p"><b>FREE DAILY GIFT</b><br><small>A new random reward each day: poins, pems or a ${s.n} item. Claimed ${st.n} time(s).</small><br>${got?'<small>Claimed! Come back tomorrow.</small>':'<button class="b g" onclick="claimGift()">CLAIM</button>'}</div>`+bx+
+ `<div class="p" style="border-color:${RC[4]}"><b style="color:${RC[4]}">${pk.n} THEME PACK</b> <small>${RN[4]} | full 7-item set</small><div class="mini" style="grid-template-columns:repeat(7,1fr)">${pk.ids.map(cv).join('')}</div><small>${pk.ids.map(d=>M[d].name).join(', ')}</small><br>${own?'OWNED':`<button class="b" onclick="buyPack()">${pk.c}● or ${pk.g}◆</button>`}</div>`+
+ `<div class="p"><b>SINGLE ITEMS</b><div class="grid">${s.singles.map(d=>{const it=M[d];return card(it,S.inv[d]?'<small>OWNED</small>':`<small>${pr(it)}●<br>or ${Math.max(1,Math.ceil(pr(it)/1000))}◆</small>`,`buy('${d}')`)}).join('')}</div></div>`};
+
+I.sort((a,b)=>CATS.indexOf(a.cat)-CATS.indexOf(b.cat)||a.rar-b.rar);
+let S;try{S=JSON.parse(localStorage.getItem('pf3'))}catch(e){}
+S=Object.assign({p:300,g:0,inv:{},bm:0,nt:0,nm:'',se:{},tr:{open:{},done:[]},eq:{skin:first('skin'),bg:first('bg'),pipe:first('pipe')},hi:{},pu:{x2:1,shield:0,slow:0},daily:{l:'',s:0},codes:[],ach:[],top:[],set:{mv:.5,sv:.7,mon:1,son:1,sens:1,gfx:1}},S||{});
+['skin','bg','pipe'].forEach(c=>S.inv[first(c)]=S.inv[first(c)]||1);
+const save=()=>{try{localStorage.setItem('pf3',JSON.stringify(S))}catch(e){}};
+/* ---------- drawing ---------- */
+const col=(c,t)=>c=='*'?`hsl(${t*4%360},90%,60%)`:c=='gl'?(t%6<3?'#0ff':'#f0f'):c;
+const R=(c,a,b,w,h,k,t)=>{c.fillStyle=col(k,t);c.fillRect(a,b,w,h)};
+function bird(c,px,py,rot,fl,e,t){c.save();c.translate(Math.round(px),Math.round(py));c.rotate(rot);const dy=fl?-2:2,sk=M[e.skin].d;
+ if(e.wings)M[e.wings].d.forEach(r=>R(c,r[0],r[1]+dy,r[2],r[3],r[4],t));
+ R(c,-9,-1,3,3,sk,t);R(c,-7,-5,14,10,sk,t);R(c,-6,2,10,3,'#fff6',t);if(!e.wings)R(c,-5,-1,6,4,'#0004',t);
+ R(c,6,-1,4,3,'#f93',t);R(c,2,-5,4,4,'#fff',t);R(c,4,-4,2,2,'#000',t);if(M[e.skin].x)XS[M[e.skin].x](c,t,dy);
+ if(e.hat)M[e.hat].d.forEach(r=>R(c,...r,t));if(e.glasses)M[e.glasses].d.forEach(r=>R(c,...r,t));c.restore()}
+function pipe(c,k,px,py,w,h,top,t){const [m,l,d,sty]=k=='*'?[col('*',t),'#fff8','#0005']:k;
+ R(c,px+1,py,w-2,h,m);R(c,px+3,py,3,h,l);R(c,px+w-6,py,3,h,d);
+ const cy=top?py+h-7:py;R(c,px,cy,w,7,m);R(c,px+2,cy,3,7,l);R(c,px+w-5,cy,3,7,d);R(c,px,cy,w,1,'#0006');R(c,px,cy+6,w,1,'#0006');if(sty)for(let i=0;i<3;i++)for(let r=0;r<3;r++){const w2=top?6-2*r:2+2*r;R(c,px+5+i*8-w2/2,top?py+h-6+r*2:py+r*2,w2,2,r==(top?2:0)?'#f33':'#eee')}}
+const tc=(d,i,t)=>col(Array.isArray(d)?d[i%d.length]:d,t);
+function icon(it,cn){const c=cn.getContext('2d');c.clearRect(0,0,40,30);
+ if(it.cat=='bg'){const g=c.createLinearGradient(0,0,0,30);g.addColorStop(0,it.d[0]);g.addColorStop(1,it.d[1]);c.fillStyle=g;c.fillRect(0,0,40,30)}
+ else if(it.cat=='pipe'){c.fillStyle='#4ec0ca';c.fillRect(0,0,40,30);pipe(c,it.d,7,0,26,30,0,tick)}
+ else{const e={skin:first('skin'),[it.cat]:it.id};if(it.cat=='trail')for(let i=1;i<5;i++){c.fillStyle=tc(it.d,i,tick+i*9);c.fillRect(20-i*5,15+(i%2)*2,3,3)}bird(c,22,17,0,0,e,tick)}}
+/* ---------- game state ---------- */
+const MD={mpr:{n:'Race',gap:62,sp:1.1,ramp:0,mp:1},mpc:{n:'Team Race',gap:62,sp:1.1,ramp:0,mp:1},classic:{n:'Classic',d:'Speeds up as you score',gap:62,sp:1,ramp:.03,max:1.7},endless:{n:'Endless',d:'Calm and steady',gap:66,sp:1.1,ramp:0},time:{n:'Time Trial',d:'45 seconds, top score',gap:64,sp:1.2,ramp:0,time:45},hard:{n:'Hardcore',d:'Tight gaps, 2x poins',gap:50,sp:1.5,ramp:.05,max:2.2,mul:2},chall:{n:'Challenge',d:'Reach 20 for a bonus',gap:56,sp:1.3,ramp:.03,max:1.8,goal:20},prac:{n:'Practice',d:'No crashes, no poins',gap:70,sp:1,ramp:0,god:1}};
+const PU=[{id:'x2',n:'2x Poin Coins',c:150},{id:'shield',n:'Shield (1 hit)',c:200},{id:'slow',n:'Slow-Mo',c:120}];
+let mode='classic',st='bot',scr='intro',paused=false,bd,pipes=[],part=[],score=0,earned=0,sp=1,gap=76,timeL=0,tick=0,gOff=0,shake=0,hitCd=0,use={},act={};
+const bgp=Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*G,s:.5+Math.random()}));
+function reset(bot){bd={x:50,y:130,vy:0,rot:0};pipes=[];part=[];score=0;earned=0;hitCd=0;const P=bot?{gap:76,sp:.9}:MD[mode];gap=P.gap;sp=P.sp;timeL=P.time||0}
+function burst(x,y,c){for(let i=0;i<6;i++)part.push({x,y,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,l:20,c})}
+function addScore(){const P=MD[mode];score++;const m=(act.x2?2:1)*(P.mul||1);if(!P.god&&!MP.on){earned+=m;S.p+=m}sfx('s');burst(bd.x,bd.y,'#ffd23f');if(P.ramp)sp=Math.min(P.max,sp+P.ramp);
+ const a={10:50,25:100,50:250,100:500}[score];if(a&&!S.ach.includes(score)){S.ach.push(score);S.p+=a;earned+=a;toast(`Score ${score}! +${a} poins`)}
+ if(P.goal&&score==P.goal){const r=S.ach.includes('c')?100:500;if(!S.ach.includes('c'))S.ach.push('c');S.p+=r;earned+=r;toast(`Challenge done! +${r} poins`)}
+ $('#sc').textContent=score;if(MP.on){send({t:'prog',s:score});hudp();if(score>=MP.goal)mpFinish()}upd();save()}
+function die(){if(st!='play')return;if(MP.on)return mpDie();st='dead';sfx('h');shake=9;for(let i=0;i<14;i++)burst(bd.x,bd.y,'#fff');
+ const nb=score>(S.hi[mode]||0);if(nb)S.hi[mode]=score;S.top.push(score);S.top.sort((a,b)=>b-a);S.top=S.top.slice(0,5);save();
+ setTimeout(()=>{if(st!='dead')return;$('#ov').innerHTML=`GAME OVER<br><br>Score ${score}${nb?' NEW BEST!':''}<br>Best ${S.hi[mode]||0}<br>Earned ${earned} poins`;show('over')},700)}
+function step(){tick++;const P=st=='bot'?{gap:76,sp:.9}:MD[mode],es=sp*(act.slow?.75:1);
+ bgp.forEach(p=>{const f=M[S.eq.bg].d[2];if(f=='cloud')p.x-=p.s*.15;else if(f=='star')p.x-=p.s*.05;else if(f=='bub'){p.y-=p.s*.3;p.x+=Math.sin(tick/20+p.s*9)*.1}else if(f=='snow'){p.y+=p.s*.4;p.x-=.2}else if(f=='ember'){p.y-=p.s*.6;p.x+=Math.sin(tick/15+p.s*9)*.3}else if(f=='leaf'){p.y+=p.s*.5;p.x-=.35+Math.sin(tick/25+p.s*9)*.25}else if(f=='storm'){p.y+=p.s*2.2;p.x-=.8}else p.y+=p.s*1.2;if(p.x<-30)p.x=W+10;if(p.y<-5)p.y=G;if(p.y>G)p.y=-5});
+ part.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.l--});part=part.filter(p=>p.l>0);
+ if(st!='dead')gOff=(gOff+es)%12;
+ if(st=='ready'){bd.y=130+Math.sin(tick/10)*4;bd.rot=0;return}
+ if(st=='bot'){const p=pipes.find(p=>p.x+PW>bd.x-7),t=p?p.gy+gap/2+7:140;if(bd.y>t&&bd.vy>-.3)bd.vy=-2.3}
+ bd.vy=Math.min(bd.vy+.12,3.2);bd.y+=bd.vy;bd.rot=Math.max(-.4,Math.min(1.1,bd.vy*.28));
+ if(st=='dead'){if(bd.y>G-5){bd.y=G-5;bd.vy=0}return}
+ if(S.eq.trail&&tick%2==0){const d=M[S.eq.trail].d;part.push({x:bd.x-8,y:bd.y+Math.random()*4-2,vx:-es*.7,vy:(Math.random()-.5)*.3,l:26,c:Array.isArray(d)?d[(tick/2)%d.length|0]:d})}
+ if(!pipes.length||pipes[pipes.length-1].x<W-SP)pipes.push({x:W,gy:30+(MP.on?MP.r():Math.random())*(G-gap-60)});
+ pipes.forEach(p=>{p.x-=es;if(!p.ok&&p.x+PW<bd.x-5){p.ok=1;if(st=='play')addScore()}});while(pipes[0]&&pipes[0].x<-PW)pipes.shift();
+ if(st=='play'){if(hitCd>0)hitCd--;if(P.time){timeL-=1/60;if(timeL<=0)return die()}
+  if(!P.god&&hitCd<=0&&pipes.some(p=>bd.x+5>p.x&&bd.x-5<p.x+PW&&(bd.y-4<p.gy||bd.y+4>p.gy+gap))){if(act.shield){act.shield=0;hitCd=70;shake=6;sfx('h')}else return die()}
+  if(tick%30==0)hudp()}
+ if(bd.y>G-5){bd.y=G-5;if(st=='bot'||P.god)bd.vy=-2.5;else if(act.shield){act.shield=0;hitCd=70;bd.vy=-3}else return die()}
+ if(bd.y<5){bd.y=5;bd.vy=0}}
+function draw(){X.save();if(shake>0){X.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake--}
+ const b=M[S.eq.bg].d,g=X.createLinearGradient(0,0,0,G);g.addColorStop(0,b[0]);g.addColorStop(1,b[1]);X.fillStyle=g;X.fillRect(-5,-5,W+10,H+10);bgx(b);
+ bgp.forEach(p=>{const f=b[2];if(f=='cloud'){X.fillStyle='#fff8';X.fillRect(p.x,p.y*.5,22,6);X.fillRect(p.x+4,p.y*.5-3,12,4)}else if(f=='star'){X.fillStyle=((tick+p.s*50)|0)%40<30?'#fff':'#fff6';X.fillRect(p.x,p.y*.8,1+(p.s>1),1+(p.s>1))}else if(f=='bub'){X.fillStyle='#fff5';X.fillRect(p.x,p.y,3,3)}else if(f=='snow'){X.fillStyle='#fff';X.fillRect(p.x,p.y,2,2)}else if(f=='ember'){X.fillStyle=p.s>1?'#fd5':'#f60';X.fillRect(p.x,p.y,2,2)}else if(f=='leaf'){X.fillStyle=p.s>1.1?'#e8a02f':p.s>.8?'#c0561e':'#a0301c';X.fillRect(Math.round(p.x),Math.round(p.y),3,2)}else if(f=='face'){}else if(f=='storm'){X.fillStyle='#9cf';X.fillRect(p.x,p.y,1,6)}else{X.fillStyle='#0f6';X.fillRect(p.x,p.y,1,5)}});
+ const pk=M[S.eq.pipe].d;pipes.forEach(p=>{pipe(X,pk,Math.round(p.x),0,PW,Math.round(p.gy),1,tick);pipe(X,pk,Math.round(p.x),Math.round(p.gy+gap),PW,G-Math.round(p.gy+gap),0,tick)});
+ const gd=b[3];if(gd){X.fillStyle=gd[0];X.fillRect(0,G,W,H-G);X.fillStyle=gd[1];for(let i=-1;i<16;i++)X.fillRect(i*12-gOff,G+3+Math.sin(tick/10+i)*2,8,4);X.fillStyle=gd[2];X.fillRect(0,G,W,2)}else{X.fillStyle='#d8c98a';X.fillRect(0,G,W,H-G);X.fillStyle='#c4b577';for(let i=-1;i<16;i++)X.fillRect(i*12-gOff,G+6,6,H-G);X.fillStyle='#5a3';X.fillRect(0,G,W,3)}
+ part.forEach(p=>{X.globalAlpha=Math.min(1,p.l/20);X.fillStyle=col(p.c,tick);X.fillRect(Math.round(p.x),Math.round(p.y),2,2)});X.globalAlpha=1;
+ if(hitCd%6<3)bird(X,bd.x,bd.y,bd.rot,st=='ready'?tick%20<10:bd.vy<0,S.eq,tick);tag(X,bd.x,bd.y-18,6);X.restore()}
+function pvDraw(){const c=$('#pv').getContext('2d'),b=M[S.eq.bg].d,g=c.createLinearGradient(0,0,0,44);g.addColorStop(0,b[0]);g.addColorStop(1,b[1]);c.fillStyle=g;c.fillRect(0,0,60,44);
+ if(S.eq.trail)for(let i=1;i<6;i++){c.fillStyle=tc(M[S.eq.trail].d,i,tick+i*9);c.fillRect(24-i*4,22+Math.sin(tick/8+i)*3,2,2)}bird(c,32,22+Math.sin(tick/12)*3,0,tick%20<10,S.eq,tick);tag(c,30,6,4)}
+let last=0,acc=0;function loop(ts){acc+=Math.min(100,ts-last);last=ts;while(acc>=16.67){acc-=16.67;if(!paused)step()}draw();if(scr=='locker')pvDraw();requestAnimationFrame(loop)}
+/* ---------- audio ---------- */
+let ac;const AC=()=>{if(!ac)try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}if(ac&&ac.state=='suspended')ac.resume();return ac};
+function tone(f,d,ty,v,f2){const a=AC();if(!a)return;const o=a.createOscillator(),g=a.createGain(),n=a.currentTime;o.type=ty;o.frequency.setValueAtTime(f,n);if(f2)o.frequency.linearRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(v,n);g.gain.linearRampToValueAtTime(0,n+d);o.connect(g);g.connect(a.destination);o.start();o.stop(n+d)}
+function sfx(k){if(!S.set.son)return;const v=S.set.sv;({f:()=>tone(520,.1,'square',.1*v,800),s:()=>{tone(880,.06,'square',.1*v);setTimeout(()=>tone(1320,.1,'square',.1*v),60)},h:()=>tone(220,.3,'sawtooth',.2*v,50),c:()=>tone(660,.05,'square',.08*v)})[k]()}
+const mel=[262,330,392,523,392,330,294,349,440,587,440,349];let mi=0;setInterval(()=>{if(S.set.mon&&ac)tone(mel[mi++%12],.18,'triangle',.07*S.set.mv)},240);
+document.addEventListener('click',e=>{if(e.target.closest('.b'))sfx('c')});
+/* ---------- UI helpers ---------- */
+const UI={},CUR=()=>`<span>● ${S.p}</span><span style="color:#6ff">◆ ${S.g}</span>`;
+function upd(){$('#cur').innerHTML=CUR()}
+function show(id){scr=id;document.querySelectorAll('.s').forEach(e=>e.classList.toggle('on',e.id==id));$('#cur').style.display=['intro','hud','pause'].includes(id)?'none':'flex';upd()}
+function go(id){if(id=='menu'&&MP.pc)mpClose();AC();if(st!='bot'){reset(true);st='bot';act={}}paused=false;if(UI[id])UI[id]();show(id)}
+let tt;function toast(t){const e=$('#ts');e.textContent=t;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',2200)}
+let okfn,altfn;function ask(m,f,lab,f2){$('#cm').textContent=m;okfn=f;altfn=f2;$('#yes').textContent=lab?lab[0]:'YES';$('#alt').style.display=f2?'':'none';$('#alt').textContent=lab?lab[1]:'';$('#no').textContent=lab?'CANCEL':'NO';$('#cf').classList.add('on')}
+$('#alt').onclick=()=>{$('#cf').classList.remove('on');altfn&&altfn()};
+$('#yes').onclick=()=>{$('#cf').classList.remove('on');okfn&&okfn()};$('#no').onclick=()=>$('#cf').classList.remove('on');
+const paint=el=>el.querySelectorAll('canvas[data-i]').forEach(c=>icon(M[c.dataset.i],c));
+const card=(it,ex,ck)=>`<div class="card" style="border-color:${RC[it.rar]}" onclick="${ck}"><canvas data-i="${it.id}" width="40" height="30"></canvas><small>${it.name}</small><small style="color:${RC[it.rar]}">${RN[it.rar]}</small>${ex}</div>`;
+const tabsH=(cur,fn,ex=[])=>[...CATS,...ex].map(c=>`<button class="b ${c==cur?'g':''}" onclick="${fn}('${c}')">${{box:'BOXES',market:'MARKET',season:'SEASON'}[c]||c.slice(0,5).toUpperCase()}</button>`).join('');
+const pr=it=>RV[it.rar]*3,pems=it=>it.pe?[2,3,5,8,12,20,40][it.rar]:Math.max(1,Math.ceil(pr(it)/1000));
+/* ---------- play flow ---------- */
+function begin0(){act={};PU.forEach(u=>{if(!MP.on&&use[u.id]&&S.pu[u.id]>0){S.pu[u.id]--;act[u.id]=1}});save();paused=false;reset(false);st='ready';$('#sc').textContent=0;show('hud');hudp()}
+function hudp(){$('#hp').style.display='block';$('#hp').innerHTML=(MP.on?`YOU ${score}/${MP.goal} | P2 ${MP.rs}/${MP.goal}<br>`:'')+(MD[mode].time?`TIME ${Math.max(0,timeL|0)} `:'')+(act.x2?'2X ':'')+(act.shield?'SHIELD ':'')+(act.slow?'SLOW':'')||'';if(!$('#hp').innerHTML)$('#hp').style.display='none'}
+function flap(){if(scr!='hud'||paused||MP.fin)return;if(st=='ready'){st='play';if(!S.ach.includes('f')){S.ach.push('f');S.p+=25;toast('First flight! +25 poins')}}if(st=='play'){bd.vy=-2.3*S.set.sens;sfx('f');if(S.eq.trail&&M[S.eq.trail].fart){if(S.set.son)tone(110,.22,'sawtooth',.18*S.set.sv,55);burst(bd.x-10,bd.y+3,'#8a7a30');burst(bd.x-10,bd.y+3,'#6a5a20')}}}
+function pause(){if(scr=='hud'&&st!='dead'&&!MP.on){paused=true;show('pause')}}
+$('#w').addEventListener('pointerdown',e=>{if(!e.target.closest('button'))flap()});
+addEventListener('keydown',e=>{if(e.code=='Space'||e.code=='ArrowUp'){if(document.activeElement.tagName!='INPUT'){e.preventDefault();flap()}}if(e.code=='Escape'||e.code=='KeyP')pause()});
+function share(){const t=`I scored ${score} in Pixel Fly (${MD[mode].n})!`;try{navigator.clipboard.writeText(t).then(()=>toast('Score copied!'),()=>toast(t))}catch(e){toast(t)}}
+/* ---------- screens ---------- */
+UI.modes=()=>{$('#ml').innerHTML=Object.entries(MD).filter(e=>!e[1].mp).map(([k,m])=>`<button class="b" onclick="mode='${k}';go('start')">${m.n}<br><small>${m.d}<br>Best ${S.hi[k]||0}</small></button>`).join('')};
+UI.start=()=>{$('#sh').textContent=MD[mode].n;$('#pl').innerHTML=PU.map(u=>`<div class="p"><b>${u.n}</b> (own ${S.pu[u.id]})<br><button class="b ${use[u.id]?'g':''}" onclick="use['${u.id}']=!use['${u.id}'];UI.start()">${use[u.id]?'USING':'USE'}</button><button class="b" onclick="buyPU('${u.id}')">BUY ${u.c}●</button></div>`).join('')};
+function buyPU(id){const u=PU.find(x=>x.id==id);ask(`Buy ${u.n} for ${u.c} poins?`,()=>{if(S.p<u.c)return toast('Not enough poins!');S.p-=u.c;S.pu[id]++;save();UI.start();upd()})}
+const day=Math.floor(Date.now()/864e5),pool=I.filter(i=>i.rar>0&&i.rar<7&&!i.pe),deal=pool[day%pool.length];let tabS='skin',tabL='skin',sel=null;
+const BX=[{id:'b1',n:'Basic Box',c:400,w:[55,30,12,3,0,0,0,0]},{id:'b2',n:'Super Box',c:1500,w:[0,40,35,18,6,1,0,0]},{id:'b3',n:'Mythic Box',c:5000,w:[0,0,0,40,35,18,7,0]},{id:'b4',n:'PEM BOX',c:30,g:1,w:[0,0,0,15,30,28,17,10]},{id:'b5',n:'MINI PEM BOX',c:10,g:1,w:[0,0,0,0,50,35,12,3]},{id:'b6',n:'MEGA PEM BOX',c:100,g:1,w:[0,0,0,0,0,0,60,40]},{id:'b7',n:'ULTIMATE PEM BOX',c:250,g:1,w:[0,0,0,0,0,0,0,100]}];
+const boxesH=l=>l.map(b=>{const t=b.w.reduce((a,c)=>a+c);return `<div class="p"><b>${b.n}</b> ${b.c}${b.g?'◆':'●'} <button class="b" onclick="openBox('${b.id}')">OPEN</button><br>${b.w.map((w,i)=>w?`<span style="color:${RC[i]}">${RN[i]} ${Math.round(w/t*100)}%</span>`:'').filter(Boolean).join(' | ')}<div class="mini">${I.filter(i=>b.w[i.rar]>0&&!i.pe&&!i.gx).slice(0,32).map(i=>`<canvas data-i="${i.id}" width="40" height="30" style="border:2px solid ${RC[i.rar]}"></canvas>`).join('')}</div><small>Showing a sample of what can drop</small></div>`}).join('');
+UI.shop=()=>{const el=$('#sl'),dp=Math.round(pr(deal)/2);$('#st').innerHTML=tabsH(tabS,'tS',['box','market','season']);$('#dl').innerHTML=`DAILY DEAL: ${deal.name} (${RN[deal.rar]}) ${S.inv[deal.id]?'OWNED':`<button class="b" onclick="buy('${deal.id}',1)">${dp}●</button>`}`;
+ el.className=tabS=='box'||tabS=='market'||tabS=='season'?'list':'grid';el.innerHTML=tabS=='season'?seasH():tabS=='market'?mktH():tabS=='box'?boxesH(BX.slice(0,3)):listH('shop',I.filter(i=>i.cat==tabS&&i.rar<7&&!i.pe),it=>card(it,S.inv[it.id]?'<small>OWNED</small>':`<small>${pr(it)}●<br>or ${pems(it)}◆</small>`,`buy('${it.id}')`));paint(el)};
+const tS=c=>{tabS=c;FS.shop.pg=0;UI.shop()};
+function buy(id,d){const it=M[id],c=Math.round(pr(it)/(d?2:1)),g=Math.max(1,Math.ceil(c/1000));if(S.inv[id])return toast('Already owned');ask(`Buy ${it.name}? Pay with:`,()=>{if(S.p<c)return toast('Not enough poins!');S.p-=c;S.inv[id]=1;save();toast('Purchased!');UI[scr]();upd()},[`${c} POINS`,`${g} PEMS`],()=>{if(S.g<g)return toast('Not enough pems!');S.g-=g;S.inv[id]=1;save();toast('Purchased!');UI[scr]();upd()})}
+function buyG(id){const it=M[id],c=pems(it);ask(`Buy ${it.name} for ${c} pems?`,()=>{if(S.g<c)return toast('Not enough pems!');S.g-=c;S.inv[id]=(S.inv[id]||0)+1;save();toast('Purchased!');UI.gems();upd()})}
+function xch(n){ask(`Exchange ${n} pems for ${n*1000} poins?`,()=>{if(S.g<n)return toast('Not enough pems!');S.g-=n;S.p+=n*1000;save();upd();toast(`+${n*1000} poins`)})}
+function openBox(id){const b=BX.find(x=>x.id==id),k=b.g?'g':'p';ask(`Open ${b.n} for ${b.c} ${b.g?'pems':'poins'}?`,()=>{if(S[k]<b.c)return toast('Not enough!');S[k]-=b.c;
+ let r=Math.random()*b.w.reduce((a,c)=>a+c),ri=0;for(;ri<7;ri++){if((r-=b.w[ri])<0)break}
+ const l=I.filter(i=>i.rar==ri&&!i.pe&&!i.gx),it=l[Math.random()*l.length|0],dup=S.inv[it.id]>0;S.inv[it.id]=(S.inv[it.id]||0)+1;save();upd();
+ spin(b,it,ri,dup);if(UI[scr])UI[scr]()})}
+function spin(b,it,ri,dup){const pl=b.pool?b.pool():I.filter(i=>b.w[i.rar]>0&&!i.pe&&!i.gx),win=34,L=[];for(let i=0;i<42;i++)L.push(i==win?it:pl[Math.random()*pl.length|0]);
+ const rb=$('#rvb'),ok=$('#rok');ok.style.display='none';rb.style.width='92%';rb.style.borderColor='#000';$('#rv').style.setProperty('--rc','#ffd23f');
+ rb.innerHTML=`OPENING...<div id="rw" style="position:relative;overflow:hidden;margin-top:.6em;background:#000"><div id="rt" style="display:flex;gap:.3em;padding:.3em">${L.map(i=>`<canvas data-i="${i.id}" width="40" height="30" style="flex:none;width:5em;border:.2em solid ${RC[i.rar]};image-rendering:pixelated"></canvas>`).join('')}</div><div style="position:absolute;left:50%;top:0;bottom:0;width:.25em;background:#ffd23f;transform:translateX(-50%)"></div></div>`;
+ paint(rb);$('#rv').classList.add('on');
+ const rt=$('#rt'),rw=$('#rw'),c=rt.children[win],tx=c.offsetLeft+c.offsetWidth/2-rw.clientWidth/2+(Math.random()-.5)*c.offsetWidth*.6;
+ rt.style.transform='translateX(0)';rt.getBoundingClientRect();rt.style.transition='transform 4.5s cubic-bezier(.12,.7,.1,1)';rt.style.transform=`translateX(${-tx}px)`;
+ let n=0;const iv=setInterval(()=>{if(S.set.son)tone(400+(n++%2)*100,.03,'square',.05*S.set.sv)},140);
+ setTimeout(()=>{clearInterval(iv);sfx('s');$('#rv').style.setProperty('--rc',RC[ri]);rb.style.borderColor=RC[ri];rb.style.width='';rb.innerHTML=`<canvas id="rc" width="40" height="30"></canvas><br>${it.name}<br><span style="color:${RC[ri]}">${RN[ri]}</span><br>${dup?'DUPLICATE (sell it in Locker)':'NEW!'}`;icon(it,$('#rc'));ok.style.display=''},4800)}
+UI.gems=()=>{const ul=I.filter(i=>i.pe&&!i.mk);$('#gl').innerHTML=`<div class="p"><b>BUY PEMS (real money)</b><br>`+[['100','0.99'],['550','4.99'],['1200','9.99']].map(([a,p])=>`<button class="b" onclick="toast('Demo build: real payments are not connected')">${a}◆ $${p}</button>`).join('')+`</div><div class="p"><b>PEMS TO POINS (1◆ = 1000●)</b><br>`+[1,5,25].map(n=>`<button class="b" onclick="xch(${n})">${n}◆</button>`).join('')+`</div><div class="p"><b>PEM EXCLUSIVES</b><br><small>Cool cosmetics sold only for pems</small><div class="grid">${ul.map(it=>card(it,`<small>${pems(it)}◆${S.inv[it.id]?' (x'+S.inv[it.id]+')':''}</small>`,`buyG('${it.id}')`)).join('')}</div></div>`+`<div class="p"><b>ULTRA PIXEL</b><br><small>Only from the pem loot boxes below</small></div>`+boxesH(BX.filter(b=>b.g));paint($('#gl'))};
+UI.locker=()=>{$('#lt').innerHTML=tabsH(tabL,'tL');const el=$('#ll');el.innerHTML=(['skin','bg','pipe'].includes(tabL)?'':`<div class="card" style="border-color:#555" onclick="eqp(null)"><small>NONE</small></div>`)+listH('lock',I.filter(i=>i.cat==tabL&&S.inv[i.id]>0),it=>card(it,`<small>x${S.inv[it.id]}${S.eq[tabL]==it.id?' ✔':''}</small>`,`eqp('${it.id}')`));paint(el);
+ $('#lb').innerHTML=sel&&S.inv[sel]>1?`${M[sel].name} x${S.inv[sel]} <button class="b" onclick="sellD()">SELL DUPE +${RV[M[sel].rar]}●</button>`:'Tap an item to try it on and equip it.'};
+const tL=c=>{tabL=c;FS.lock.pg=0;UI.locker()};
+function eqp(id){if(id==null)S.eq[tabL]=null;else{sel=id;S.eq[M[id].cat]=id}save();UI.locker()}
+function sellD(){const it=M[sel];if(S.inv[sel]>1){S.inv[sel]--;S.p+=RV[it.rar];save();upd();toast(`Sold! +${RV[it.rar]} poins`);UI.locker()}}
+UI.daily=()=>{const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString(),ok=S.daily.l!=t,ns=S.daily.l==y?S.daily.s+1:1,r=100+50*Math.min(ns,7);$('#dy').innerHTML=`Streak: ${S.daily.s} days<br><br>${ok?`Today: ${r} poins<br><button class="b g" onclick="claim(${ns},${r})">CLAIM</button>`:'Claimed! Come back tomorrow.'}`};
+function claim(n,r){S.daily={l:new Date().toDateString(),s:n};S.p+=r;save();toast(`+${r} poins!`);UI.daily();upd()}
+const CODES={'9001':{p:5000,g:1000}};
+function redeem(){const k=$('#ci').value.trim().toLowerCase(),c=CODES[k],m=$('#cmsg');if(k.replace(/:/g,'')=='143'){S.bm=1;save();UI.menu();$('#ci').value='';return m.textContent='Code accepted. Check the main menu...'}if(!c)return m.textContent='Invalid code.';if(S.codes.includes(k))return m.textContent='Code already used.';S.codes.push(k);S.p+=c.p;S.g+=c.g;save();upd();m.textContent=`+${c.p} poins and +${c.g} pems!`;$('#ci').value=''}
+UI.stats=()=>{const ach=[['f','First flight'],[10,'Score 10'],[25,'Score 25'],[50,'Score 50'],[100,'Score 100'],['c','Complete a challenge']];$('#sx').innerHTML='<b>BEST SCORES</b><br>'+Object.entries(MD).filter(e=>!e[1].mp).map(([k,m])=>`${m.n}: ${S.hi[k]||0}`).join('<br>')+'<br><br><b>TOP RUNS</b><br>'+(S.top.join(', ')||'none yet')+'<br><br><b>ACHIEVEMENTS</b><br>'+ach.map(a=>(S.ach.includes(a[0])?'✔ ':'✖ ')+a[1]).join('<br>')+'<br>'+(I.filter(i=>i.cat=='skin'&&!i.gx&&!i.pe).every(i=>S.inv[i.id])?'✔':'✖')+' Unlock all skins'};
+UI.settings=()=>{const s=S.set,r=(l,k,mn,mx)=>`${l}<input type="range" min="${mn}" max="${mx}" step=".1" value="${s[k]}" oninput="S.set.${k}=+this.value;save()">`;$('#sg').innerHTML=r('Music volume','mv',0,1)+r('Sound volume','sv',0,1)+r('Control sensitivity','sens',.8,1.2)+`<button class="b" onclick="tg('mon')">Music: ${s.mon?'ON':'OFF'}</button><button class="b" onclick="tg('son')">Sound: ${s.son?'ON':'OFF'}</button><button class="b" onclick="tg('gfx')">Graphics: ${s.gfx?'PIXEL':'SMOOTH'}</button><button class="b r" onclick="ask('Erase all progress?',()=>{try{localStorage.removeItem('pf3')}catch(e){}location.reload()})">RESET SAVE</button>`};
+function tg(k){S.set[k]=S.set[k]?0:1;if(k=='gfx')cv.style.imageRendering=S.set.gfx?'pixelated':'auto';save();UI.settings()}
+/* ---------- trading: code-based, works with no server ---------- */
+const TR={tab:'offer',pick:null,d:{gp:0,gg:0,gi:[],wp:0,wg:0,wi:[]},rd:null,out:'',msg:''},ND=()=>({gp:0,gg:0,gi:[],wp:0,wg:0,wi:[]});
+const ck=j=>[...j].reduce((a,c)=>(a*31+c.charCodeAt(0))%99991,7),enc=(pre,o)=>{const j=JSON.stringify(o);return pre+btoa(j)+'.'+ck(j)};
+const dec=(pre,t)=>{try{t=t.trim();if(!t.startsWith(pre))return;const[b,k]=t.slice(pre.length).split('.'),j=atob(b);if(ck(j)!=k)return;return JSON.parse(j)}catch(e){}};
+const isStart=d=>['skin','bg','pipe'].includes(M[d].cat)&&d==first(M[d].cat);
+const okSide=(p,g,it)=>Number.isInteger(p)&&Number.isInteger(g)&&p>=0&&g>=0&&p<=1e7&&g<=1e5&&Array.isArray(it)&&it.length<=6&&new Set(it).size==it.length&&it.every(d=>M[d]&&!isStart(d));
+const okOffer=o=>o&&typeof o.id=='string'&&o.id.length<20&&okSide(o.gp,o.gg,o.gi)&&okSide(o.wp,o.wg,o.wi)&&(o.gp+o.gg+o.gi.length)>0&&(o.wp+o.wg+o.wi.length)>0;
+const sideT=(p,g,it)=>[p?p+'●':'',g?g+'◆':'',...it.map(d=>M[d].name)].filter(Boolean).join(', ')||'nothing';
+const tGive=x=>{S.inv[x]=(S.inv[x]||0)+1},tTake=x=>{S.inv[x]--;if(!S.inv[x])Object.keys(S.eq).forEach(k=>{if(S.eq[k]==x)S.eq[k]=['skin','bg','pipe'].includes(k)?first(k):null})};
+const owns=(p,g,it)=>S.p>=p&&S.g>=g&&it.every(x=>S.inv[x]>0);
+const ttab=t=>{TR.tab=t;TR.pick=null;TR.out='';TR.msg='';TR.rd=null;UI.trade()};
+const trm=(k,x)=>{TR.d[k+'i']=TR.d[k+'i'].filter(y=>y!=x);UI.trade()};
+const tpick=id=>{const a=TR.d[TR.pick+'i'];if(a.length>=6)toast('Max 6 items');else a.push(id);TR.pick=null;UI.trade()};
+function copyT(){const e=$('#tout');e.select();try{navigator.clipboard.writeText(e.value).then(()=>toast('Code copied!'),()=>toast('Select the code and copy it'))}catch(x){toast('Select the code and copy it')}}
+function mkOffer(){const d=TR.d,o={id:Math.random().toString(36).slice(2,10),...d};
+ if(!okOffer(o))return toast('Offer something and ask for something');if(!owns(d.gp,d.gg,d.gi))return toast("You don't have all of that");
+ S.p-=d.gp;S.g-=d.gg;d.gi.forEach(tTake);S.tr.open[o.id]=o;save();upd();TR.out=enc('PF1-',o);TR.d=ND();TR.msg='Offer created and your items are held safe. Send this code to the other player.';UI.trade()}
+function readOffer(){const o=dec('PF1-',$('#tcode').value);TR.msg='';TR.out='';
+ if(!okOffer(o))TR.msg='That is not a valid offer code.';else if(S.tr.open[o.id])TR.msg='That is your own offer.';else if(S.tr.done.includes(o.id))TR.msg='You already accepted this offer.';else TR.rd=o;UI.trade()}
+function acceptOffer(){const o=TR.rd;if(!owns(o.wp,o.wg,o.wi))return toast("You can't afford this trade");
+ ask(`Give ${sideT(o.wp,o.wg,o.wi)} and get ${sideT(o.gp,o.gg,o.gi)}?`,()=>{if(!owns(o.wp,o.wg,o.wi))return toast("You can't afford this trade");
+  S.p+=o.gp-o.wp;S.g+=o.gg-o.wg;o.wi.forEach(tTake);o.gi.forEach(tGive);S.tr.done.push(o.id);save();upd();
+  TR.rd=null;TR.out=enc('PF1R-',{id:o.id,p:o.wp,g:o.wg,i:o.wi});TR.msg='Trade done! You got your items. Send this reply code back so they get theirs.';UI.trade()})}
+function finishTrade(){const r=dec('PF1R-',$('#tcode2').value),o=r&&S.tr.open[r.id];
+ if(!o||r.p!=o.wp||r.g!=o.wg||JSON.stringify([...r.i].sort())!=JSON.stringify([...o.wi].sort()))return toast('Reply code does not match an open offer');
+ S.p+=o.wp;S.g+=o.wg;o.wi.forEach(tGive);delete S.tr.open[o.id];save();upd();toast('Trade complete!');TR.msg='Trade complete! You received '+sideT(o.wp,o.wg,o.wi)+'.';UI.trade()}
+function cancelOffer(id){const o=S.tr.open[id];if(!o)return;ask('Cancel this offer and take your items back?',()=>{S.p+=o.gp;S.g+=o.gg;o.gi.forEach(tGive);delete S.tr.open[id];save();upd();TR.out='';UI.trade()})}
+UI.trade=()=>{const T=TR,d=T.d,tb=$('#tb');
+ $('#tt').innerHTML=[['offer','OFFER'],['accept','ACCEPT'],['pend','PENDING']].map(([k,l])=>`<button class="b ${T.tab==k?'g':''}" onclick="ttab('${k}')">${l}</button>`).join('');
+ tb.className=T.pick?'grid':'list';
+ if(T.pick){const g=T.pick=='g',src=g?I.filter(i=>S.inv[i.id]>0&&!isStart(i.id)&&!d.gi.includes(i.id)):I.filter(i=>!isStart(i.id)&&!d.wi.includes(i.id));
+  tb.innerHTML=`<div class="p" style="grid-column:1/-1">${g?'Pick an item to GIVE':'Pick an item you WANT'} <button class="b r" onclick="TR.pick=null;UI.trade()">CANCEL</button></div>`+listH('trd',src,it=>card(it,g?`<small>x${S.inv[it.id]}</small>`:'',`tpick('${it.id}')`));paint(tb);return}
+ const blk=(k,t)=>`<div class="p"><b>${t}</b><br>Poins <input type="text" inputmode="numeric" value="${d[k+'p']}" style="width:28%" onchange="TR.d.${k}p=Math.max(0,parseInt(this.value)||0)"> Pems <input type="text" inputmode="numeric" value="${d[k+'g']}" style="width:20%" onchange="TR.d.${k}g=Math.max(0,parseInt(this.value)||0)"><br>${d[k+'i'].map(x=>`<button class="b" onclick="trm('${k}','${x}')">${M[x].name} ✖</button>`).join('')}<br><button class="b" onclick="TR.pick='${k}';UI.trade()">+ ADD ITEM</button></div>`;
+ const out=(T.out?`<div class="p"><small>${T.msg}</small><br><textarea readonly id="tout">${T.out}</textarea><br><button class="b g" onclick="copyT()">COPY CODE</button></div>`:T.msg?`<div class="p"><small>${T.msg}</small></div>`:'');
+ let h='';
+ if(T.tab=='offer')h=out+blk('g','YOU GIVE')+blk('w','YOU WANT')+`<button class="b g" onclick="mkOffer()">CREATE OFFER CODE</button><div class="p"><small>Your side is held until the trade is finished or cancelled. Max 6 items per side.</small></div>`;
+ else if(T.tab=='accept')h=T.rd?`${out}<div class="p"><b>OFFER</b><br>They give: ${sideT(T.rd.gp,T.rd.gg,T.rd.gi)}<br>They want: ${sideT(T.rd.wp,T.rd.wg,T.rd.wi)}<br><button class="b g" onclick="acceptOffer()">ACCEPT</button><button class="b r" onclick="TR.rd=null;UI.trade()">DECLINE</button></div>`:out+`<div class="p"><b>PASTE AN OFFER CODE</b><br><textarea id="tcode" placeholder="PF1-..."></textarea><button class="b g" onclick="readOffer()">READ OFFER</button></div>`;
+ else{const ids=Object.keys(S.tr.open);h=out+(ids.length?ids.map(id=>{const o=S.tr.open[id];return `<div class="p"><b>OPEN OFFER</b><br>You give: ${sideT(o.gp,o.gg,o.gi)}<br>You want: ${sideT(o.wp,o.wg,o.wi)}<br><button class="b" onclick="TR.out=enc('PF1-',S.tr.open['${id}']);TR.msg='Your offer code:';UI.trade()">SHOW CODE</button><button class="b r" onclick="cancelOffer('${id}')">CANCEL</button></div>`}).join('')+`<div class="p"><b>PASTE A REPLY CODE</b><br><textarea id="tcode2" placeholder="PF1R-..."></textarea><button class="b g" onclick="finishTrade()">FINISH TRADE</button></div>`:`<div class="p"><small>No open offers.</small></div>`)}
+ tb.innerHTML=h};
+/* ---------- multiplayer: peer-to-peer, players swap two codes ---------- */
+const MP={on:0,host:0,pc:null,dc:null,fin:0,rfin:0,rs:0,goal:30,seed:1,r:null,done:0,kind:'mpr',msg:'',code:'',tab:'h'};
+const send=o=>{try{MP.dc&&MP.dc.readyState=='open'&&MP.dc.send(JSON.stringify(o))}catch(e){}};
+const rtc=()=>{const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});pc.onconnectionstatechange=()=>{if(['failed','disconnected','closed'].includes(pc.connectionState)&&MP.on&&MP.pc==pc)mpLost()};return pc};
+const gathered=pc=>new Promise(r=>{if(pc.iceGatheringState=='complete')return r();pc.onicegatheringstatechange=()=>pc.iceGatheringState=='complete'&&r();setTimeout(r,4000)});
+function mpClose(){const pc=MP.pc,dc=MP.dc;MP.pc=MP.dc=null;MP.on=0;MP.host=0;MP.code='';MP.msg='';MP.done=0;MP.fin=0;MP.rfin=0;try{dc&&dc.close();pc&&pc.close()}catch(e){}}
+function mpLost(){toast('Connection lost');mpClose();go('menu')}
+function mpDC(dc){dc.onopen=()=>{MP.dc=dc;MP.on=1;MP.msg='Connected!';if(scr=='mp')UI.mp()};dc.onmessage=e=>{try{mpMsg(JSON.parse(e.data))}catch(x){}};dc.onclose=()=>{if(MP.on&&MP.dc==dc)mpLost()}}
+async function mpHost(){mpClose();const pc=MP.pc=rtc();MP.host=1;MP.msg='Making code...';UI.mp();mpDC(pc.createDataChannel('g'));await pc.setLocalDescription(await pc.createOffer());await gathered(pc);MP.code=btoa(JSON.stringify(pc.localDescription));MP.msg='Send this code to your friend, then paste their reply.';UI.mp()}
+async function mpJoin(){const t=$('#mpin').value;mpClose();try{const o=JSON.parse(atob(t.trim())),pc=MP.pc=rtc();pc.ondatachannel=e=>mpDC(e.channel);await pc.setRemoteDescription(o);await pc.setLocalDescription(await pc.createAnswer());await gathered(pc);MP.code=btoa(JSON.stringify(pc.localDescription));MP.msg='Send this reply to the host. You connect automatically.'}catch(e){MP.msg='That code is not valid.';MP.pc=null}UI.mp()}
+async function mpAnswer(){try{await MP.pc.setRemoteDescription(JSON.parse(atob($('#mpin2').value.trim())));MP.msg='Connecting...'}catch(e){MP.msg='That reply code is not valid.'}UI.mp()}
+const mpCopy=()=>{const e=$('#mpc');e.select();try{navigator.clipboard.writeText(e.value).then(()=>toast('Copied!'))}catch(x){}};
+function mpMsg(m){if(m.t=='start'){MP.kind=mode=m.k;MP.goal=m.g;MP.seed=m.s;MP.done=0;MP.fin=0;MP.rfin=0;MP.rs=0;MP.r=sr(m.s);begin0()}
+ else if(m.t=='prog'){MP.rs=m.s;hudp()}
+ else if(m.t=='dead'&&!MP.done){MP.rs=0;if(MP.kind=='mpc'){toast('Partner crashed! Back to start');mpReset()}}
+ else if(m.t=='fin'){MP.rfin=1;if(MP.fin&&!MP.done)mpResult(1)}
+ else if(m.t=='win'&&!MP.done)mpResult(0)}
+function mpReset(){if(MP.done)return;MP.fin=0;MP.rfin=0;MP.r=sr(MP.seed);reset(false);st='ready';$('#sc').textContent=0;send({t:'prog',s:0});hudp()}
+function mpDie(){st='dead';sfx('h');shake=9;for(let i=0;i<14;i++)burst(bd.x,bd.y,'#fff');if(MP.kind=='mpc')send({t:'dead'});setTimeout(()=>{if(MP.on&&!MP.done&&st=='dead')mpReset()},900)}
+function mpFinish(){if(MP.done)return;if(MP.kind=='mpr'){send({t:'win'});mpResult(1)}else{MP.fin=1;send({t:'fin'});st='ready';toast('Finished! Waiting for your partner...');if(MP.rfin)mpResult(1)}}
+function mpResult(w){MP.done=1;st='dead';$('#ov').innerHTML=MP.kind=='mpc'?'TEAM WIN!<br><br>You both reached the finish!':w?'YOU WIN!<br><br>You reached the finish first!':'YOU LOSE<br><br>Your opponent got there first.';show('over')}
+function begin(){if(MP.on){if(MP.host){const sd=Math.random()*1e9|0,m={t:'start',k:MP.kind,g:MP.goal,s:sd};send(m);mpMsg(m)}else toast('Only the host can start a race');return}begin0()}
+UI.mp=()=>{let h=`<div class="p"><small>${MP.msg||'Play with a friend on another device. No server needed: you swap two codes by chat.'}</small></div>`;
+ if(MP.on)h+=MP.host?`<div class="p"><b>MODE</b><br><button class="b ${MP.kind=='mpr'?'g':''}" onclick="MP.kind='mpr';UI.mp()">RACE</button><button class="b ${MP.kind=='mpc'?'g':''}" onclick="MP.kind='mpc';UI.mp()">TEAM RACE</button><br><small>${MP.kind=='mpr'?'First to the finish line wins. If you crash you restart.':'Work together: if either of you crashes you BOTH restart. Both must reach the finish.'}</small><br>PIPES TO FINISH: ${[20,30,50].map(n=>`<button class="b ${MP.goal==n?'g':''}" onclick="MP.goal=${n};UI.mp()">${n}</button>`).join('')}<br><button class="b g" onclick="begin()">START</button></div>`:`<div class="p">Waiting for the host to start...</div>`;
+ else{h+=`<div class="tabs"><button class="b ${MP.tab=='h'?'g':''}" onclick="mpClose();MP.tab='h';UI.mp()">HOST</button><button class="b ${MP.tab=='j'?'g':''}" onclick="mpClose();MP.tab='j';UI.mp()">JOIN</button></div>`;
+  const ta=`<textarea readonly id="mpc" onclick="this.select()">${MP.code}</textarea><button class="b" onclick="mpCopy()">COPY</button>`;
+  h+=MP.tab=='h'?(MP.code?`<div class="p"><b>1. Send this code</b><br>${ta}<br><b>2. Paste their reply</b><br><textarea id="mpin2"></textarea><button class="b g" onclick="mpAnswer()">CONNECT</button></div>`:`<button class="b g" onclick="mpHost()">CREATE GAME</button>`):(MP.code?`<div class="p"><b>Send this reply to the host</b><br>${ta}</div>`:`<div class="p"><b>Paste the host's code</b><br><textarea id="mpin"></textarea><button class="b g" onclick="mpJoin()">JOIN</button></div>`)}
+ $('#mpb').innerHTML=h};
+/* ---------- betting, black market, nametag ---------- */
+function bgx(b){if(b[2]=='face'){X.fillStyle='#8fd45a';X.fillRect(45,15,90,95);X.fillRect(40,25,100,75);X.fillStyle='#000';X.fillRect(58,40,20,5);X.fillRect(102,40,20,5);X.fillRect(62,45,12,3);X.fillRect(106,45,12,3);X.fillStyle='#600';X.fillRect(70,85,40,24);X.fillStyle='#f66';X.fillRect(74,102,32,7);for(let i=0;i<6;i++){X.fillStyle=`hsl(${i*60+tick*4},90%,55%)`;X.fillRect(74+i*5+Math.round(Math.sin(tick/6+i)*2),104,5,G-104)}}
+ if(b[4]){X.textAlign='center';X.font='11px "Press Start 2P",monospace';b[4].split('|').forEach((t,i)=>{X.fillStyle=`hsl(${(tick*3+i*60)%360},90%,70%)`;X.fillText(t,90,110+i*18)});X.textAlign='left'}}
+function tag(c,x,y,z){if(!S.nt||!S.nm)return;c.save();c.font=z+'px "Press Start 2P",monospace';c.textAlign='center';c.lineWidth=z/3;c.strokeStyle='#000';c.strokeText(S.nm,x,y);c.fillStyle='#fff';c.fillText(S.nm,x,y);c.restore()}
+UI.menu=()=>{$('#bmside').style.display=S.bm?'block':'none'};UI.menu();
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'),_ul=UI.locker;
+UI.locker=()=>{_ul();const e=$('#ntg');e.style.display=S.nt?'block':'none';if(S.nt)e.innerHTML=`NAMETAG <input type="text" id="nti" maxlength="14" value="${esc(S.nm||'')}" onchange="S.nm=this.value.slice(0,14);save()"> <small>shows above your bird</small>`};
+function bmRedeem(){const k=$('#bmi').value.trim().toLowerCase().replace(/:/g,''),c=BMC[k],m=$('#bmm');if(!c)return m.textContent='Invalid code.';if(S.codes.includes('bm'+k))return m.textContent='Code already used.';
+ S.codes.push('bm'+k);S.p+=c.p||0;S.g+=c.g||0;(c.i||[]).forEach(d=>S.inv[d]=(S.inv[d]||0)+1);save();upd();toast('Secret code accepted!');UI.bm();$('#bmm').textContent=c.msg}
+const gotNt=()=>{S.nt=1;S.nm=S.nm||'Player';save();upd();toast('Nametag unlocked! Edit it in the Locker.');UI.bm()};
+function buyNt(){ask('Buy the Nametag? Pay with:',()=>{if(S.p<2400000)return toast('Not enough poins!');S.p-=2400000;gotNt()},['2400000 POINS','2400 PEMS'],()=>{if(S.g<2400)return toast('Not enough pems!');S.g-=2400;gotNt()})}
+UI.bm=()=>{const mine=I.filter(i=>i.an&&S.inv[i.id]>0);$('#bmb').innerHTML=`<div class="p" style="border-color:${RC[8]}"><small>Ancient exclusives. They can only be unlocked with secret codes typed here.</small></div><div class="p"><b>SECRET CODE</b><br><input type="text" id="bmi" placeholder="Enter secret code"><button class="b g" onclick="bmRedeem()">REDEEM</button><div id="bmm"><small></small></div></div><div class="p"><b>NAMETAG</b><br><small>Shows above your bird. Change the name in the Locker.</small><br>${S.nt?'OWNED':`<button class="b" onclick="buyNt()">2400◆ or 2400000●</button>`}</div><div class="p"><b style="color:${RC[8]}">YOUR ANCIENT ITEMS</b><div class="grid">${mine.map(it=>card(it,'<small>x'+S.inv[it.id]+'</small>','')).join('')||'<small>None yet</small>'}</div></div>`;paint($('#bmb'))};
+const GB={tab:'coin',cur:'p',amt:100,pick:null,res:'',busy:0},WS=[['RED','#e33',4,2],['BLUE','#39f',3,3],['GREEN','#3c5',2,4],['GOLD','#fc3',1,9]],CS=[['HEADS','#fc3',1,2],['TAILS','#ccc',1,2]];
+UI.bet=()=>{const g=GB,cn=g.tab=='coin',W=cn?CS:WS,tot=W.reduce((a,w)=>a+w[2],0),tb=g.cur=='p'?[10,50,100,500,1000,5000]:[1,5,10,25,50];
+ $('#bb').innerHTML=`<div class="tabs"><button class="b ${cn?'g':''}" onclick="if(!GB.busy){GB.tab='coin';GB.pick=null;GB.res='';UI.bet()}">COIN FLIP</button><button class="b ${cn?'':'g'}" onclick="if(!GB.busy){GB.tab='wheel';GB.pick=null;GB.res='';UI.bet()}">COLOR WHEEL</button></div>`+
+ `<div class="p"><b>BET WITH</b> <button class="b ${g.cur=='p'?'g':''}" onclick="if(!GB.busy){GB.cur='p';GB.amt=100;UI.bet()}">POINS</button><button class="b ${g.cur=='g'?'g':''}" onclick="if(!GB.busy){GB.cur='g';GB.amt=5;UI.bet()}">PEMS</button><br>${tb.map(n=>`<button class="b ${g.amt==n?'g':''}" onclick="GB.amt=${n};UI.bet()">${n}</button>`).join('')}<br>Custom <input type="text" inputmode="numeric" value="${g.amt}" style="width:35%" onchange="GB.amt=Math.max(1,parseInt(this.value)||1)"></div>`+
+ `<div class="p"><b>${cn?'PICK A SIDE':'PICK A COLOR'}</b><br>${W.map(w=>`<button class="b" style="background:${w[1]};${g.pick==w[0]?'outline:.3em solid #fff':''}" onclick="GB.pick='${w[0]}';UI.bet()">${w[0]}<br><small>x${w[3]} | ${Math.round(w[2]/tot*100)}%</small></button>`).join('')}<br><button class="b g" onclick="gPlay()">${cn?'FLIP':'SPIN'}</button></div><div class="p" id="bres" style="text-align:center;font-size:1em">${g.res||'Place your bet!'}</div>`};
+function gPlay(){const g=GB,k=g.cur;if(g.busy)return;if(!g.pick)return toast('Pick first!');if(S[k]<g.amt)return toast('Not enough '+(k=='p'?'poins':'pems')+'!');
+ S[k]-=g.amt;save();upd();g.busy=1;const W=g.tab=='coin'?CS:WS,tot=W.reduce((a,w)=>a+w[2],0);let r=Math.random()*tot,wi=0;for(;wi<W.length-1;wi++){if((r-=W[wi][2])<0)break}
+ let n=0;const stp=()=>{const el=$('#bres');if(scr!='bet'||!el){g.busy=0;return}
+  if(n<18){const w=W[n++%W.length];el.innerHTML=`<span style="color:${w[1]};font-size:1.4em">${w[0]}</span>`;sfx('c');return setTimeout(stp,50+n*14)}
+  const w=W[wi],win=w[0]==g.pick,pay=win?g.amt*w[3]:0;S[k]+=pay;save();upd();g.busy=0;sfx(win?'s':'h');
+  g.res=`<span style="color:${w[1]};font-size:1.4em">${w[0]}!</span><br>${win?`YOU WIN +${pay-g.amt} ${k=='p'?'poins':'pems'}`:`You lost ${g.amt} ${k=='p'?'poins':'pems'}`}`;UI.bet()};stp()}
+function rs(){const w=Math.min(innerWidth,innerHeight*.6),e=$('#w');e.style.width=w+'px';e.style.height=w/.6+'px';e.style.fontSize=w/30+'px'}
+addEventListener('resize',rs);rs();cv.style.imageRendering=S.set.gfx?'pixelated':'auto';reset(true);upd();$('#cur').style.display='none';requestAnimationFrame(loop);
+</script></body></html>
